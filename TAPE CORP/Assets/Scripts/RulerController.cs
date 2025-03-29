@@ -48,48 +48,6 @@ public class RulerController : MonoBehaviour
         Debug.Log("RulerController initialized.");
     }
 
-    void Update()
-    {
-        if (isGrabbing)
-        {
-            UpdateLine();
-            stretchLength = Vector2.Distance(handle.position, originalParent.position);
-
-            if (!Input.GetKey(grabKey))
-            {
-                Debug.Log("Grab released.");
-                Release();
-            }
-        }
-    }
-
-    void OnTriggerStay2D(Collider2D collision)
-    {
-        if (!Input.GetKeyDown(grabKey)) return;
-        if (!collision.CompareTag("Box") && !collision.CompareTag("Handle")) return;
-
-        Debug.Log($"Trigger detected with: {collision.name}");
-
-        if (collision.CompareTag("Box"))
-        {
-            grabbedObject = collision.transform;
-            grabbedObject.SetParent(handle);
-            grabbedObject.localPosition = Vector3.zero;
-            isGrabbing = true;
-        }
-        else
-        {
-            grabbedObject = collision.transform;
-            handle.SetParent(grabbedObject);
-            isGrabbing = true;
-
-            if (lineRenderer != null) lineRenderer.enabled = true;
-            if (lineCollider != null) lineCollider.enabled = true;
-
-            UpdateLine();
-        }
-    }
-
     void UpdateLine()
     {
         Vector3 p1 = handle.position;
@@ -105,13 +63,48 @@ public class RulerController : MonoBehaviour
         {
             lineCollider.points = new Vector2[]
             {
-                lineCollider.transform.InverseTransformPoint(p1),
-                lineCollider.transform.InverseTransformPoint(p2)
+            lineCollider.transform.InverseTransformPoint(p1),
+            lineCollider.transform.InverseTransformPoint(p2)
             };
         }
 
-        Debug.DrawLine(p1, p2, Color.white);
+        // 줄 시작점에 handle 위치를 정확히 동기화
+        handle.position = lineRenderer.GetPosition(0);
     }
+
+    void OnTriggerStay2D(Collider2D collision)
+    {
+        if (!Input.GetKey(grabKey)) return;
+
+        if (!collision.CompareTag("Box") && !collision.CompareTag("Handle")) return;
+
+        // 거리가 너무 멀면 무시
+        float dist = Vector2.Distance(handle.position, collision.transform.position);
+        if (dist > 1.5f) return; // ← 판정 거리 완화 (필요시 값 조정)
+
+        Debug.Log($"Trigger detected with: {collision.name}");
+
+        if (collision.CompareTag("Box"))
+        {
+            grabbedObject = collision.transform;
+            grabbedObject.SetParent(handle);
+            grabbedObject.localPosition = Vector3.zero;
+            isGrabbing = true;
+        }
+        else // Handle
+        {
+            grabbedObject = collision.transform;
+            handle.SetParent(grabbedObject);
+            isGrabbing = true;
+
+            if (lineRenderer != null) lineRenderer.enabled = true;
+            if (lineCollider != null) lineCollider.enabled = true;
+
+            UpdateLine();
+        }
+    }
+
+   
 
     void Release()
     {
@@ -158,14 +151,15 @@ public class RulerController : MonoBehaviour
     {
         if (grabbedObject == null) yield break;
 
-        Transform toPull = grabbedObject;
+        Transform toPull = FindParentWithNameContains(grabbedObject, "player");
+        if (toPull == null) yield break;
+
         Vector3 start = toPull.position;
         Vector3 end = originalParent.position;
 
         float duration = Mathf.Clamp(0.1f + stretchLength * 0.05f, 0.1f, 0.5f);
         float t = 0f;
 
-        // 물리 끌림 방지 (움직임 직접 제어 위해)
         Rigidbody2D rb = toPull.GetComponent<Rigidbody2D>();
         if (rb != null)
         {
@@ -173,28 +167,49 @@ public class RulerController : MonoBehaviour
             rb.isKinematic = true;
         }
 
+        // 줄이 더 빨리 줄어들도록 속도 계수 부여
+        float lineShrinkFactor = 1.5f;
+
         while (t < 1f)
         {
             t += Time.deltaTime / duration;
-            toPull.position = Vector3.Lerp(start, end, t);
-            UpdateLine();
+
+            // 줄 위치는 플레이어보다 더 빠르게 줄어든 것처럼 보이게
+            float lineT = Mathf.Clamp01(t * lineShrinkFactor);
+
+            Vector3 pullPos = Vector3.Lerp(start, end, t);
+            Vector3 fakeHandlePos = Vector3.Lerp(start, end, lineT);
+
+            toPull.position = pullPos;
+            handle.position = fakeHandlePos; // handle 위치를 항상 줄 끝에 강제 동기화
+
+            UpdateLine(); // 줄도 같이 줄이기
             yield return null;
         }
 
         toPull.position = end;
-
-        // 다시 물리 적용
-        if (rb != null)
-            rb.isKinematic = false;
-
-        // 줄 제거
-        if (lineRenderer != null) lineRenderer.enabled = false;
-        if (lineCollider != null) lineCollider.enabled = false;
-
-        // 핸들 복귀
         handle.localPosition = originalLocalPos;
         handle.SetParent(originalParent);
 
-        Debug.Log("Grabbed object pulled to player.");
+        if (rb != null)
+            rb.isKinematic = false;
+
+        if (lineRenderer != null) lineRenderer.enabled = false;
+        if (lineCollider != null) lineCollider.enabled = false;
+
+        Debug.Log("Entire player pulled to original position.");
+    }
+
+
+    Transform FindParentWithNameContains(Transform child, string keyword)
+    {
+        Transform current = child;
+        while (current != null)
+        {
+            if (current.name.Contains(keyword))
+                return current;
+            current = current.parent;
+        }
+        return null;
     }
 }
