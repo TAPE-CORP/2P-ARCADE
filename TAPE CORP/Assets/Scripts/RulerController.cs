@@ -3,65 +3,132 @@ using System.Collections;
 
 public class RulerController : MonoBehaviour
 {
-    [Header("참조 설정")]
-    public Transform startPoint;    // 시작점
-    public Transform endPoint;      // 실제 끝점
-    public Rigidbody2D rb;
+    [Header("잡기 설정")]
+    public KeyCode grabKey = KeyCode.Space;      // 인스펙터에서 지정할 잡기 키
+    public Transform handle;                     // 손잡이 위치
+    public float grabDistance = 1.5f;            // 손잡이 앞 감지 거리
+    public LayerMask grabMask;                   // 잡을 수 있는 레이어 지정
 
-    [Header("라인 길이 조절")]
-    public float maxLineLength = 5f;  // 최대 허용 길이
-    public float retractSpeed = 5f;   // 선이 줄어드는 속도
+    [Header("줄 설정")]
+    public float maxLineLength = 5f;
+    public float retractSpeed = 5f;
+    public float forcePower = 5f;
 
-    [Header("변수 조정")]
-    public float forcePower = 5f;     // 선이 줄어들 때 가해지는 힘
-    private bool isConnected = false;
-    private LineRenderer lineRenderer;
-    // 코루틴에서 업데이트 되는 현재 선의 끝점
+    [Header("참조")]
+    public LineRenderer lineRenderer;
+    public Rigidbody2D myRb;
+
+    private Transform target;                    // 현재 잡은 대상
+    private Rigidbody2D targetRb;
     private Vector3 currentEndPosition;
-    private Coroutine coroutine;
+    private Coroutine retractCoroutine;
+    private bool isGrabbing = false;
 
-    void OnEnable()
+    private void Start()
     {
-        isConnected = true;
-        rb = GetComponent<Rigidbody2D>();
-        lineRenderer = GetComponent<LineRenderer>();
-        lineRenderer.enabled = true;
-        if (endPoint != null)
-        {
-            currentEndPosition = endPoint.position;
-        }
-    }
-
-    void Update()
-    {
-        if (startPoint == null || endPoint == null || !lineRenderer.enabled)
-            return;
-
-        Vector3 startPos = startPoint.position;
-        // 코루틴이 실행 중이면 currentEndPosition을 사용하고,
-        // 그렇지 않으면 endPoint.position을 사용합니다.
-        Vector3 displayEndPos = (coroutine != null) ? currentEndPosition : endPoint.position;
-
-        // 시작점과 실제 끝점 사이의 거리는 endPoint.position으로 계산합니다.
-        float distance = Vector3.Distance(startPos, endPoint.position);
-        // LineRenderer에 시작점과 표시할 끝점을 설정합니다.
-        lineRenderer.positionCount = 2;
-        lineRenderer.SetPosition(0, startPos);
-        lineRenderer.SetPosition(1, displayEndPos);
-        if (distance > maxLineLength)
-        {
-            this.enabled = false;
-        }
-    }
-    public void OnDisable()
-    {
-        ForceBack(lineRenderer.GetPosition(0), lineRenderer.GetPosition(1));
-        isConnected = false;
+        if (!myRb) myRb = GetComponent<Rigidbody2D>();
+        if (!lineRenderer) lineRenderer = GetComponent<LineRenderer>();
         lineRenderer.enabled = false;
     }
-    private void ForceBack(Vector2 start, Vector2 end)
+
+    private void Update()
     {
-        Debug.Log("충격 발생 " + this.gameObject.name + " " + (start - end).normalized);
-        rb.AddForce((start - end).normalized * forcePower * Vector2.Distance(start, end), ForceMode2D.Impulse);
+        if (Input.GetKeyDown(grabKey))
+        {
+            TryGrab();
+        }
+        else if (Input.GetKey(grabKey) && isGrabbing)
+        {
+            UpdateLine();
+            if (Vector2.Distance(handle.position, target.position) > maxLineLength)
+            {
+                ReleaseGrab();
+            }
+        }
+        else if (Input.GetKeyUp(grabKey) && isGrabbing)
+        {
+            ReleaseGrab();
+        }
+    }
+
+    private void TryGrab()
+    {
+        RaycastHit2D hit = Physics2D.Raycast(handle.position, transform.right, grabDistance, grabMask);
+        if (hit.collider != null && (hit.collider.CompareTag("Box") || hit.collider.CompareTag("Handle")))
+        {
+            target = hit.collider.transform;
+            targetRb = target.GetComponent<Rigidbody2D>();
+            isGrabbing = true;
+            lineRenderer.enabled = true;
+            currentEndPosition = target.position;
+
+            if (target.CompareTag("Handle"))
+            {
+                // 내 리지드바디는 멈추고, 상대 Handle은 이동하게 함
+                myRb.velocity = Vector2.zero;
+                myRb.bodyType = RigidbodyType2D.Static;
+                targetRb.bodyType = RigidbodyType2D.Dynamic;
+            }
+
+            UpdateLine(); // 시작하자마자 줄 그림
+        }
+    }
+
+    private void UpdateLine()
+    {
+        if (!target || !isGrabbing) return;
+
+        Vector3 start = handle.position;
+        Vector3 end = target.position;
+        currentEndPosition = end;
+
+        lineRenderer.positionCount = 2;
+        lineRenderer.SetPosition(0, start);
+        lineRenderer.SetPosition(1, end);
+    }
+
+    private void ReleaseGrab()
+    {
+        if (!target) return;
+
+        isGrabbing = false;
+        lineRenderer.enabled = false;
+
+        // 탄성 효과 적용
+        if (retractCoroutine != null) StopCoroutine(retractCoroutine);
+        retractCoroutine = StartCoroutine(ApplyElasticForce());
+
+        // 내 리지드바디 다시 활성화
+        myRb.bodyType = RigidbodyType2D.Dynamic;
+        target = null;
+        targetRb = null;
+    }
+
+    private IEnumerator ApplyElasticForce()
+    {
+        Vector3 start = handle.position;
+        Vector3 end = currentEndPosition;
+
+        float t = 0f;
+        while (t < 1f)
+        {
+            currentEndPosition = Vector3.Lerp(end, start, t);
+            t += Time.deltaTime * retractSpeed;
+
+            if (lineRenderer.enabled)
+            {
+                lineRenderer.SetPosition(1, currentEndPosition);
+            }
+
+            yield return null;
+        }
+
+        // 진짜 물리적인 반동
+        if (targetRb)
+        {
+            Vector2 forceDir = (handle.position - end).normalized;
+            float dist = Vector2.Distance(handle.position, end);
+            targetRb.AddForce(forceDir * dist * forcePower, ForceMode2D.Impulse);
+        }
     }
 }
