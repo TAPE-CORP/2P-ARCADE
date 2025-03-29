@@ -4,72 +4,49 @@ public class PlayerController : MonoBehaviour
 {
     public float moveSpeed = 5f;
     public float jumpForce = 7f;
-    public bool isPlayerOne = true;
 
-    public Transform P1;
-    public Transform P2;
+    public KeyCode leftKey = KeyCode.LeftArrow;
+    public KeyCode rightKey = KeyCode.RightArrow;
+    public KeyCode jumpKey = KeyCode.UpArrow;
+    public KeyCode interactKey = KeyCode.DownArrow;
+
+    public Transform targetToInteract;
+    public RulerController interactionRuler;
+
     private Rigidbody2D rb;
     private bool isGrounded;
 
-    public RulerController p1_TO_p2;
-    public RulerController p2_TO_p1;
-    private void Start()
+    protected virtual void Start()
     {
         rb = GetComponent<Rigidbody2D>();
     }
 
-    private void Update()
+    protected virtual void Update()
     {
         float move = 0f;
 
-        if (isPlayerOne)
-        {
-            // 1P - 방향키
-            if (Input.GetKey(KeyCode.LeftArrow))
-                move = -1f;
-            else if (Input.GetKey(KeyCode.RightArrow))
-                move = 1f;
+        if (Input.GetKey(leftKey))
+            move = -1f;
+        else if (Input.GetKey(rightKey))
+            move = 1f;
 
-            if (Input.GetKeyDown(KeyCode.UpArrow) && isGrounded)
-            {
-                rb.velocity = new Vector2(rb.velocity.x, jumpForce);
-            }
-            if (Input.GetKeyDown(KeyCode.DownArrow) && !p1_TO_p2.enabled && Vector2.Distance(P1.position, P2.position) < 1f)
-            {
-                p1_TO_p2.enabled = true;
-            }
-            else if (Input.GetKeyDown(KeyCode.DownArrow) && p1_TO_p2.enabled)
-            {
-                p1_TO_p2.enabled = false;
-            }
-        }
-        else
+        if (Input.GetKeyDown(jumpKey) && isGrounded)
         {
-            // 2P - WASD
-            if (Input.GetKey(KeyCode.A))
-                move = -1f;
-            else if (Input.GetKey(KeyCode.D))
-                move = 1f;
-
-            if (Input.GetKeyDown(KeyCode.W) && isGrounded)
-            {
-                rb.velocity = new Vector2(rb.velocity.x, jumpForce);
-            }
-            if (Input.GetKeyDown(KeyCode.S) && !p2_TO_p1.enabled && Vector2.Distance(P1.position, P2.position) < 1f)
-            {
-                p2_TO_p1.enabled = true;
-            }
-            else if (Input.GetKeyDown(KeyCode.S) && p2_TO_p1.enabled)
-            {
-                p2_TO_p1.enabled = false;
-            }
+            rb.velocity = new Vector2(rb.velocity.x, jumpForce);
         }
+
+        if (Input.GetKeyDown(interactKey) && interactionRuler != null)
+        {
+            float dist = Vector2.Distance(transform.position, targetToInteract.position);
+            if (dist < 1f)
+                interactionRuler.enabled = !interactionRuler.enabled;
+        }
+
         rb.velocity = new Vector2(move * moveSpeed, rb.velocity.y);
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        // 바닥에 닿았는지 체크
         foreach (ContactPoint2D contact in collision.contacts)
         {
             if (contact.normal.y > 0.5f)
@@ -82,7 +59,6 @@ public class PlayerController : MonoBehaviour
 
     private void OnCollisionStay2D(Collision2D collision)
     {
-        // 접촉 유지 중에도 바닥이면 isGrounded 유지
         foreach (ContactPoint2D contact in collision.contacts)
         {
             if (contact.normal.y > 0.5f)
@@ -91,7 +67,6 @@ public class PlayerController : MonoBehaviour
                 return;
             }
         }
-
         isGrounded = false;
     }
 
