@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    [Header("방향 고정 키 설정")]
+    public KeyCode directionLockKey = KeyCode.DownArrow; 
     public float moveSpeed = 5f;            // 최대 속도
     public float acceleration = 10f;        // 가속도
     public float deceleration = 15f;        // 감속도
@@ -34,12 +36,16 @@ public class PlayerController : MonoBehaviour
             targetVelocityX = -moveSpeed;
         else if (Input.GetKey(rightKey))
             targetVelocityX = moveSpeed;
+        // 방향 반전 (잡기 중이면 방향 고정)
+        bool isLocked = interactionRuler != null && interactionRuler.isGrabbing == true;
 
-        // 방향 반전
-        if (targetVelocityX > 0.1f)
-            transform.localScale = new Vector3(1, 1, 1);
-        else if (targetVelocityX < -0.1f)
-            transform.localScale = new Vector3(-1, 1, 1);
+        if (!isLocked)
+        {
+            if (targetVelocityX > 0.1f)
+                transform.localScale = new Vector3(1, 1, 1);
+            else if (targetVelocityX < -0.1f)
+                transform.localScale = new Vector3(-1, 1, 1);
+        }
 
         // 관성 보간 처리
         bool isMovingInput = Mathf.Abs(targetVelocityX) > 0.01f;
@@ -80,6 +86,7 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
+
 
     public void OnCollisionStay2D(Collision2D collision)
     {

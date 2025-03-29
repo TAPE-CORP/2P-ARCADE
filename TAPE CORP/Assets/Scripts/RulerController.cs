@@ -1,134 +1,159 @@
 using UnityEngine;
-using System.Collections;
 
 public class RulerController : MonoBehaviour
 {
-    [Header("잡기 설정")]
-    public KeyCode grabKey = KeyCode.Space;      // 인스펙터에서 지정할 잡기 키
-    public Transform handle;                     // 손잡이 위치
-    public float grabDistance = 1.5f;            // 손잡이 앞 감지 거리
-    public LayerMask grabMask;                   // 잡을 수 있는 레이어 지정
+    [Header("핸들 및 조작")]
+    public Transform handle;
+    public KeyCode grabKey = KeyCode.Space;
+    public LayerMask grabMask;
 
-    [Header("줄 설정")]
-    public float maxLineLength = 5f;
-    public float retractSpeed = 5f;
-    public float forcePower = 5f;
-
-    [Header("참조")]
+    [Header("줄자 효과 (Line 오브젝트 내에 있음)")]
+    public Transform lineObject;                 // "line" 오브젝트
     public LineRenderer lineRenderer;
-    public Rigidbody2D myRb;
+    public EdgeCollider2D lineCollider;
 
-    private Transform target;                    // 현재 잡은 대상
-    private Rigidbody2D targetRb;
-    private Vector3 currentEndPosition;
-    private Coroutine retractCoroutine;
-    private bool isGrabbing = false;
+    [Header("반동 설정")]
+    public float returnForcePower = 10f;
+    public Vector2 playerKnockbackDirection = Vector2.left;
+    public float playerKnockbackPower = 5f;
 
-    private void Start()
+    private Transform originalParent;
+    private Vector3 originalLocalPos;
+    private Transform grabbedObject;
+    public bool isGrabbing = false;
+    private float directionSign = 1f;
+
+    [HideInInspector] public float stretchLength = 0f;
+
+    void Start()
     {
-        if (!myRb) myRb = GetComponent<Rigidbody2D>();
-        if (!lineRenderer) lineRenderer = GetComponent<LineRenderer>();
-        lineRenderer.enabled = false;
+        originalParent = handle.parent;
+        originalLocalPos = handle.localPosition;
+        directionSign = Mathf.Sign(originalParent.localScale.x);
+
+        if (lineRenderer != null)
+        {
+            lineRenderer.enabled = false;
+            lineRenderer.positionCount = 2;
+            lineRenderer.startWidth = 0.05f;
+            lineRenderer.endWidth = 0.05f;
+            lineRenderer.useWorldSpace = true;
+        }
+
+        if (lineCollider != null)
+        {
+            lineCollider.enabled = false;
+        }
+
+        Debug.Log("RulerController initialized.");
     }
 
-    private void Update()
+    void Update()
     {
-        if (Input.GetKeyDown(grabKey))
-        {
-            TryGrab();
-        }
-        else if (Input.GetKey(grabKey) && isGrabbing)
+
+        if (isGrabbing)
         {
             UpdateLine();
-            if (Vector2.Distance(handle.position, target.position) > maxLineLength)
+
+            stretchLength = Vector2.Distance(handle.position, originalParent.position);
+
+            if (!Input.GetKey(grabKey))
             {
-                ReleaseGrab();
+                Debug.Log("Grab released.");
+                Release();
             }
-        }
-        else if (Input.GetKeyUp(grabKey) && isGrabbing)
-        {
-            ReleaseGrab();
         }
     }
 
-    private void TryGrab()
+    void OnTriggerStay2D(Collider2D collision)
     {
-        RaycastHit2D hit = Physics2D.Raycast(handle.position, transform.right, grabDistance, grabMask);
-        if (hit.collider != null && (hit.collider.CompareTag("Box") || hit.collider.CompareTag("Handle")))
+        if (!Input.GetKeyDown(grabKey)) return;
+        if (!collision.CompareTag("Box") && !collision.CompareTag("Handle")) return;
+
+        Debug.Log($"Trigger detected with: {collision.name}");
+
+        if (collision.CompareTag("Box"))
         {
-            target = hit.collider.transform;
-            targetRb = target.GetComponent<Rigidbody2D>();
+            grabbedObject = collision.transform;
+            grabbedObject.SetParent(handle);
+            grabbedObject.localPosition = Vector3.zero;
             isGrabbing = true;
-            lineRenderer.enabled = true;
-            currentEndPosition = target.position;
+        }
+        else
+        {
+            grabbedObject = collision.transform;
+            handle.SetParent(grabbedObject);
+            isGrabbing = true;
 
-            if (target.CompareTag("Handle"))
-            {
-                // 내 리지드바디는 멈추고, 상대 Handle은 이동하게 함
-                myRb.velocity = Vector2.zero;
-                myRb.bodyType = RigidbodyType2D.Static;
-                targetRb.bodyType = RigidbodyType2D.Dynamic;
-            }
+            if (lineRenderer != null) lineRenderer.enabled = true;
+            if (lineCollider != null) lineCollider.enabled = true;
 
-            UpdateLine(); // 시작하자마자 줄 그림
+            UpdateLine();
         }
     }
 
-    private void UpdateLine()
+    void UpdateLine()
     {
-        if (!target || !isGrabbing) return;
+        Vector3 p1 = handle.position;
+        Vector3 p2 = originalParent.position;
 
-        Vector3 start = handle.position;
-        Vector3 end = target.position;
-        currentEndPosition = end;
+        if (lineRenderer != null)
+        {
+            lineRenderer.SetPosition(0, p1);
+            lineRenderer.SetPosition(1, p2);
+        }
 
-        lineRenderer.positionCount = 2;
-        lineRenderer.SetPosition(0, start);
-        lineRenderer.SetPosition(1, end);
+        if (lineCollider != null)
+        {
+            lineCollider.points = new Vector2[]
+            {
+                lineCollider.transform.InverseTransformPoint(p1),
+                lineCollider.transform.InverseTransformPoint(p2)
+            };
+        }
+
+        Debug.DrawLine(p1, p2, Color.white);
     }
 
-    private void ReleaseGrab()
+    void Release()
     {
-        if (!target) return;
-
         isGrabbing = false;
-        lineRenderer.enabled = false;
 
-        // 탄성 효과 적용
-        if (retractCoroutine != null) StopCoroutine(retractCoroutine);
-        retractCoroutine = StartCoroutine(ApplyElasticForce());
+        if (lineRenderer != null) lineRenderer.enabled = false;
+        if (lineCollider != null) lineCollider.enabled = false;
 
-        // 내 리지드바디 다시 활성화
-        myRb.bodyType = RigidbodyType2D.Dynamic;
-        target = null;
-        targetRb = null;
-    }
+        handle.SetParent(originalParent);
+        handle.localPosition = originalLocalPos; // 방향 무시하고 원래 위치로 복귀
 
-    private IEnumerator ApplyElasticForce()
-    {
-        Vector3 start = handle.position;
-        Vector3 end = currentEndPosition;
+        Debug.Log("Handle returned to original parent.");
 
-        float t = 0f;
-        while (t < 1f)
+        if (grabbedObject != null)
         {
-            currentEndPosition = Vector3.Lerp(end, start, t);
-            t += Time.deltaTime * retractSpeed;
-
-            if (lineRenderer.enabled)
+            Rigidbody2D rb = grabbedObject.GetComponent<Rigidbody2D>();
+            if (rb != null)
             {
-                lineRenderer.SetPosition(1, currentEndPosition);
+                Vector2 dir = (originalParent.position - grabbedObject.position).normalized;
+                rb.AddForce(dir * stretchLength * returnForcePower, ForceMode2D.Impulse);
+                Debug.Log("Rebound force applied to grabbed object.");
             }
 
-            yield return null;
+            if (grabbedObject.parent == handle)
+            {
+                grabbedObject.SetParent(null);
+                Debug.Log("Box was attached to handle, now detached.");
+            }
         }
 
-        // 진짜 물리적인 반동
-        if (targetRb)
+        Rigidbody2D playerRb = originalParent.GetComponent<Rigidbody2D>();
+        if (playerRb != null)
         {
-            Vector2 forceDir = (handle.position - end).normalized;
-            float dist = Vector2.Distance(handle.position, end);
-            targetRb.AddForce(forceDir * dist * forcePower, ForceMode2D.Impulse);
+            playerRb.AddForce(playerKnockbackDirection.normalized * stretchLength * playerKnockbackPower, ForceMode2D.Impulse);
+            Debug.Log("Knockback applied to player.");
         }
+
+        grabbedObject = null;
+        stretchLength = 0f;
     }
+
+
 }
