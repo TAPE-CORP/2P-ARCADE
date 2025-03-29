@@ -185,13 +185,6 @@ public class RulerController : MonoBehaviour
             }
         }
 
-        // 플레이어 반동
-        Rigidbody2D playerRb = originalParent.GetComponent<Rigidbody2D>();
-        if (playerRb != null)
-        {
-            playerRb.AddForce(playerKnockbackDirection.normalized * stretchLength * playerKnockbackPower, ForceMode2D.Impulse);
-        }
-
         stretchLength = 0f;
     }
     IEnumerator SmoothHandleReturn()
@@ -207,48 +200,68 @@ public class RulerController : MonoBehaviour
         float duration = Mathf.Clamp(0.1f + stretchLength * 0.05f, 0.1f, 0.5f);
         float t = 0f;
 
-        Rigidbody2D rb = toPull.GetComponent<Rigidbody2D>();
-        if (rb != null)
+        Rigidbody2D pulledRb = toPull.GetComponent<Rigidbody2D>();
+        Rigidbody2D myRb = originalParent.GetComponent<Rigidbody2D>();
+
+        if (pulledRb != null)
         {
-            rb.velocity = Vector2.zero;
-            rb.isKinematic = true;
+            pulledRb.velocity = Vector2.zero;
+            pulledRb.isKinematic = true;
         }
 
-        // 줄이 더 빨리 줄어들도록 속도 계수 부여
+        if (myRb != null)
+        {
+            myRb.velocity = Vector2.zero;
+        }
+
         float lineShrinkFactor = 1.5f;
 
         while (t < 1f)
         {
             t += Time.deltaTime / duration;
 
-            // 줄 위치는 플레이어보다 더 빠르게 줄어든 것처럼 보이게
             float lineT = Mathf.Clamp01(t * lineShrinkFactor);
 
             Vector3 pullPos = Vector3.Lerp(start, end, t);
             Vector3 fakeHandlePos = Vector3.Lerp(start, end, lineT);
 
             toPull.position = pullPos;
-            handle.position = fakeHandlePos; // handle 위치를 항상 줄 끝에 강제 동기화
+            handle.position = fakeHandlePos;
 
-            UpdateLine(); // 줄도 같이 줄이기
+            UpdateLine();
+
             yield return null;
         }
 
-        toPull.position = end;
+        // 도착 후 물리 다시 활성화
+        if (pulledRb != null)
+            pulledRb.isKinematic = false;
+
         handle.localPosition = originalLocalPos;
         handle.SetParent(originalParent);
-
-        if (rb != null)
-            rb.isKinematic = false;
 
         if (lineRenderer != null) lineRenderer.enabled = false;
         if (lineCollider != null) lineCollider.enabled = false;
 
+        if (myRb != null)
+        {
+            Vector2 pullDir = (originalParent.position - toPull.position).normalized;
+
+            // 위로 튕기는 방향 추가
+            Vector2 launchDir = (pullDir + Vector2.up).normalized;
+
+            float knockPower = Mathf.Clamp(stretchLength, 1f, 10f);
+
+            //  강한 물리 반작용
+            myRb.AddForce(launchDir * knockPower * playerKnockbackPower, ForceMode2D.Impulse);
+
+  
+            Debug.Log($"[반작용 force] {launchDir * knockPower * playerKnockbackPower}");
+        }
         Debug.Log("Entire player pulled to original position.");
 
         grabbedObject = null;
     }
-
 
     Transform FindParentWithNameContains(Transform child, string keyword)
     {
