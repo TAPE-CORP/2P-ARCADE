@@ -13,15 +13,15 @@ public class PlayerController : MonoBehaviour
     public Transform targetToInteract;
     public RulerController interactionRuler;
 
-    private Rigidbody2D rb;
-    private bool isGrounded;
+    public Rigidbody2D rb;
+    public bool isGrounded;
 
-    protected virtual void Start()
+    public virtual void Start()
     {
         rb = GetComponent<Rigidbody2D>();
     }
 
-    protected virtual void Update()
+    public virtual void Update()
     {
         float move = 0f;
 
@@ -45,7 +45,7 @@ public class PlayerController : MonoBehaviour
         rb.velocity = new Vector2(move * moveSpeed, rb.velocity.y);
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    public void OnCollisionEnter2D(Collision2D collision)
     {
         foreach (ContactPoint2D contact in collision.contacts)
         {
@@ -57,7 +57,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void OnCollisionStay2D(Collision2D collision)
+    public void OnCollisionStay2D(Collision2D collision)
     {
         foreach (ContactPoint2D contact in collision.contacts)
         {
@@ -70,7 +70,7 @@ public class PlayerController : MonoBehaviour
         isGrounded = false;
     }
 
-    private void OnCollisionExit2D(Collision2D collision)
+    public void OnCollisionExit2D(Collision2D collision)
     {
         isGrounded = false;
     }
