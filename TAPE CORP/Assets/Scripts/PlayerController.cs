@@ -35,15 +35,23 @@ public class PlayerController : MonoBehaviour
         else if (Input.GetKey(rightKey))
             targetVelocityX = moveSpeed;
 
-        // 방향 반전 (오브젝트 자체를 좌우로 뒤집음)
+        // 방향 반전
         if (targetVelocityX > 0.1f)
             transform.localScale = new Vector3(1, 1, 1);
         else if (targetVelocityX < -0.1f)
             transform.localScale = new Vector3(-1, 1, 1);
 
-        // 이동 (관성 있는 보간 처리)
-        currentVelocityX = Mathf.MoveTowards(currentVelocityX, targetVelocityX,
-            (Mathf.Abs(targetVelocityX) > 0.1f ? acceleration : deceleration) * Time.deltaTime);
+        // 관성 보간 처리
+        bool isMovingInput = Mathf.Abs(targetVelocityX) > 0.01f;
+        float appliedAccel = isMovingInput ? acceleration : deceleration;
+
+        currentVelocityX = Mathf.MoveTowards(currentVelocityX, targetVelocityX, appliedAccel * Time.deltaTime);
+
+        // 손 뗐을 때도 살짝 미끄러지게 유지
+        if (!isMovingInput && Mathf.Abs(currentVelocityX) < 0.05f)
+        {
+            currentVelocityX = 0f; // 부드럽게 멈추게 보정
+        }
 
         rb.velocity = new Vector2(currentVelocityX, rb.velocity.y);
 
@@ -61,7 +69,6 @@ public class PlayerController : MonoBehaviour
                 interactionRuler.enabled = !interactionRuler.enabled;
         }
     }
-
     public void OnCollisionEnter2D(Collision2D collision)
     {
         foreach (ContactPoint2D contact in collision.contacts)
