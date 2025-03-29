@@ -47,7 +47,6 @@ public class RulerController : MonoBehaviour
 
         Debug.Log("RulerController initialized.");
     }
-
     void UpdateLine()
     {
         Vector3 p1 = handle.position;
@@ -63,14 +62,27 @@ public class RulerController : MonoBehaviour
         {
             lineCollider.points = new Vector2[]
             {
-            lineCollider.transform.InverseTransformPoint(p1),
-            lineCollider.transform.InverseTransformPoint(p2)
+            lineObject.InverseTransformPoint(p1),
+            lineObject.InverseTransformPoint(p2)
             };
         }
-
-        // 줄 시작점에 handle 위치를 정확히 동기화
-        handle.position = lineRenderer.GetPosition(0);
     }
+    void Update()
+    {
+        if (isGrabbing)
+        {
+            Debug.Log("Updating Line...");
+            UpdateLine();
+            stretchLength = Vector2.Distance(handle.position, originalParent.position);
+
+            if (!Input.GetKey(grabKey))
+            {
+                Debug.Log("Grab released.");
+                Release();
+            }
+        }
+    }
+
 
     void OnTriggerStay2D(Collider2D collision)
     {
@@ -80,7 +92,7 @@ public class RulerController : MonoBehaviour
 
         // 거리가 너무 멀면 무시
         float dist = Vector2.Distance(handle.position, collision.transform.position);
-        if (dist > 1.5f) return; // ← 판정 거리 완화 (필요시 값 조정)
+        if (dist > 1.5f) return;
 
         Debug.Log($"Trigger detected with: {collision.name}");
 
@@ -90,8 +102,13 @@ public class RulerController : MonoBehaviour
             grabbedObject.SetParent(handle);
             grabbedObject.localPosition = Vector3.zero;
             isGrabbing = true;
+
+            if (lineRenderer != null) lineRenderer.enabled = true;
+            if (lineCollider != null) lineCollider.enabled = true;
+
+            UpdateLine(); // 첫 줄 생성 확실히 보장
         }
-        else // Handle
+        else if (collision.CompareTag("Handle"))
         {
             grabbedObject = collision.transform;
             handle.SetParent(grabbedObject);
@@ -100,11 +117,9 @@ public class RulerController : MonoBehaviour
             if (lineRenderer != null) lineRenderer.enabled = true;
             if (lineCollider != null) lineCollider.enabled = true;
 
-            UpdateLine();
+            UpdateLine(); // 줄 좌표 즉시 갱신
         }
     }
-
-   
 
     void Release()
     {
@@ -144,7 +159,6 @@ public class RulerController : MonoBehaviour
             playerRb.AddForce(playerKnockbackDirection.normalized * stretchLength * playerKnockbackPower, ForceMode2D.Impulse);
         }
 
-        grabbedObject = null;
         stretchLength = 0f;
     }
     IEnumerator SmoothHandleReturn()
@@ -198,6 +212,8 @@ public class RulerController : MonoBehaviour
         if (lineCollider != null) lineCollider.enabled = false;
 
         Debug.Log("Entire player pulled to original position.");
+
+        grabbedObject = null;
     }
 
 
