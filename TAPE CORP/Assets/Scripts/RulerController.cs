@@ -154,35 +154,47 @@ public class RulerController : MonoBehaviour
         grabbedObject = null;
         stretchLength = 0f;
     }
-
     IEnumerator SmoothHandleReturn()
     {
-        Transform player = originalParent; // 당길 대상은 플레이어 본체
-        Vector3 start = player.position;
-        Vector3 end = handle.position;
+        if (grabbedObject == null) yield break;
 
-        // stretchLength에 따라 당기는 속도 계산
+        Transform toPull = grabbedObject;
+        Vector3 start = toPull.position;
+        Vector3 end = originalParent.position;
+
         float duration = Mathf.Clamp(0.1f + stretchLength * 0.05f, 0.1f, 0.5f);
         float t = 0f;
+
+        // 물리 끌림 방지 (움직임 직접 제어 위해)
+        Rigidbody2D rb = toPull.GetComponent<Rigidbody2D>();
+        if (rb != null)
+        {
+            rb.velocity = Vector2.zero;
+            rb.isKinematic = true;
+        }
 
         while (t < 1f)
         {
             t += Time.deltaTime / duration;
-            player.position = Vector3.Lerp(start, end, t);
-            UpdateLine(); // 줄 같이 줄이기
+            toPull.position = Vector3.Lerp(start, end, t);
+            UpdateLine();
             yield return null;
         }
 
-        player.position = end;
+        toPull.position = end;
 
-        // 줄 시각적 제거
+        // 다시 물리 적용
+        if (rb != null)
+            rb.isKinematic = false;
+
+        // 줄 제거
         if (lineRenderer != null) lineRenderer.enabled = false;
         if (lineCollider != null) lineCollider.enabled = false;
 
-        // 핸들도 위치 보정
+        // 핸들 복귀
         handle.localPosition = originalLocalPos;
+        handle.SetParent(originalParent);
 
-        Debug.Log("Player pulled back smoothly.");
+        Debug.Log("Grabbed object pulled to player.");
     }
-
 }
