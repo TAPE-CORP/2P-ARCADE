@@ -69,9 +69,13 @@ public class RulerController : MonoBehaviour
     }
     void Update()
     {
+        if (!isGrabbing && Input.GetKeyDown(grabKey))
+        {
+            TryGrabNearby();
+        }
+
         if (isGrabbing)
         {
-            Debug.Log("Updating Line...");
             UpdateLine();
             stretchLength = Vector2.Distance(handle.position, originalParent.position);
 
@@ -80,6 +84,35 @@ public class RulerController : MonoBehaviour
                 Debug.Log("Grab released.");
                 Release();
             }
+        }
+    }
+
+    void TryGrabNearby()
+    {
+        Collider2D[] hits = Physics2D.OverlapCircleAll(handle.position, 1.5f, grabMask);
+        Debug.Log($"[Grab Attempt] Found {hits.Length} colliders nearby.");
+
+        foreach (var hit in hits)
+        {
+            Debug.Log($"Checking {hit.name} with tag {hit.tag}");
+
+            if (!hit.CompareTag("Box") && !hit.CompareTag("Handle")) continue;
+
+            grabbedObject = FindParentWithNameContains(hit.transform, "player");
+            if (grabbedObject == null)
+            {
+                Debug.LogWarning("No player root found!");
+                continue;
+            }
+
+            handle.SetParent(grabbedObject);
+            isGrabbing = true;
+
+            if (lineRenderer != null) lineRenderer.enabled = true;
+            if (lineCollider != null) lineCollider.enabled = true;
+
+            UpdateLine();
+            break;
         }
     }
 
