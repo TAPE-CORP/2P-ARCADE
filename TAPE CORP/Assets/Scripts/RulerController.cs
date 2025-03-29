@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class RulerController : MonoBehaviour
 {
@@ -8,7 +9,7 @@ public class RulerController : MonoBehaviour
     public LayerMask grabMask;
 
     [Header("줄자 효과 (Line 오브젝트 내에 있음)")]
-    public Transform lineObject;                 // "line" 오브젝트
+    public Transform lineObject;
     public LineRenderer lineRenderer;
     public EdgeCollider2D lineCollider;
 
@@ -16,12 +17,12 @@ public class RulerController : MonoBehaviour
     public float returnForcePower = 10f;
     public Vector2 playerKnockbackDirection = Vector2.left;
     public float playerKnockbackPower = 5f;
+    public float pullDuration = 0.25f;
 
     private Transform originalParent;
     private Vector3 originalLocalPos;
     private Transform grabbedObject;
     public bool isGrabbing = false;
-    private float directionSign = 1f;
 
     [HideInInspector] public float stretchLength = 0f;
 
@@ -29,7 +30,6 @@ public class RulerController : MonoBehaviour
     {
         originalParent = handle.parent;
         originalLocalPos = handle.localPosition;
-        directionSign = Mathf.Sign(originalParent.localScale.x);
 
         if (lineRenderer != null)
         {
@@ -50,11 +50,9 @@ public class RulerController : MonoBehaviour
 
     void Update()
     {
-
         if (isGrabbing)
         {
             UpdateLine();
-
             stretchLength = Vector2.Distance(handle.position, originalParent.position);
 
             if (!Input.GetKey(grabKey))
@@ -119,22 +117,24 @@ public class RulerController : MonoBehaviour
     {
         isGrabbing = false;
 
-        if (lineRenderer != null) lineRenderer.enabled = false;
-        if (lineCollider != null) lineCollider.enabled = false;
+        if (lineRenderer != null) lineRenderer.enabled = true; // 줄 유지
+        if (lineCollider != null) lineCollider.enabled = true;
 
+        // 핸들 부모만 복귀 (위치는 천천히 이동)
         handle.SetParent(originalParent);
-        handle.localPosition = originalLocalPos; // 방향 무시하고 원래 위치로 복귀
-
-        Debug.Log("Handle returned to original parent.");
+        StartCoroutine(SmoothHandleReturn());
 
         if (grabbedObject != null)
         {
             Rigidbody2D rb = grabbedObject.GetComponent<Rigidbody2D>();
+            Vector3 pullTarget = originalParent.position;
+
             if (rb != null)
             {
-                Vector2 dir = (originalParent.position - grabbedObject.position).normalized;
-                rb.AddForce(dir * stretchLength * returnForcePower, ForceMode2D.Impulse);
-                Debug.Log("Rebound force applied to grabbed object.");
+                Vector2 dir = (pullTarget - grabbedObject.position).normalized;
+                float dist = Vector2.Distance(pullTarget, grabbedObject.position);
+                rb.AddForce(dir * dist * returnForcePower, ForceMode2D.Impulse);
+                Debug.Log($"Rebound force applied: {dir * dist * returnForcePower}");
             }
 
             if (grabbedObject.parent == handle)
@@ -144,16 +144,45 @@ public class RulerController : MonoBehaviour
             }
         }
 
+        // 플레이어 반동
         Rigidbody2D playerRb = originalParent.GetComponent<Rigidbody2D>();
         if (playerRb != null)
         {
             playerRb.AddForce(playerKnockbackDirection.normalized * stretchLength * playerKnockbackPower, ForceMode2D.Impulse);
-            Debug.Log("Knockback applied to player.");
         }
 
         grabbedObject = null;
         stretchLength = 0f;
     }
 
+    IEnumerator SmoothHandleReturn()
+    {
+        Transform player = originalParent; // 당길 대상은 플레이어 본체
+        Vector3 start = player.position;
+        Vector3 end = handle.position;
+
+        // stretchLength에 따라 당기는 속도 계산
+        float duration = Mathf.Clamp(0.1f + stretchLength * 0.05f, 0.1f, 0.5f);
+        float t = 0f;
+
+        while (t < 1f)
+        {
+            t += Time.deltaTime / duration;
+            player.position = Vector3.Lerp(start, end, t);
+            UpdateLine(); // 줄 같이 줄이기
+            yield return null;
+        }
+
+        player.position = end;
+
+        // 줄 시각적 제거
+        if (lineRenderer != null) lineRenderer.enabled = false;
+        if (lineCollider != null) lineCollider.enabled = false;
+
+        // 핸들도 위치 보정
+        handle.localPosition = originalLocalPos;
+
+        Debug.Log("Player pulled back smoothly.");
+    }
 
 }
