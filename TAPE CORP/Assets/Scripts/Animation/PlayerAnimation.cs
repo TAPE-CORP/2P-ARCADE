@@ -2,11 +2,29 @@ using UnityEngine;
 
 public class PlayerAnimatorController : PlayerController
 {
-    [Header("¾Ö´Ï¸ÞÀÌ¼Ç ´ë»ó")]
-    public SpriteRenderer wheelRenderer;
-    public SpriteRenderer bodyRenderer;
-    public SpriteRenderer hatRenderer;
-    public SpriteRenderer eyesRenderer;
+    [System.Serializable]
+    public class PartAnimation
+    {
+        public string partName;
+        public Animation animationComponent;
+        public AnimationClip idleClip;
+        public AnimationClip moveClip;
+        public AnimationClip fallClip;
+    }
+
+    [Header("¹ÙÄû")]
+    public PartAnimation wheel1;
+    public PartAnimation wheel2;
+
+    [Header("´«")]
+    public PartAnimation eye1;
+    public PartAnimation eye2;
+
+    [Header("¸öÅë")]
+    public PartAnimation body;
+
+    [Header("¸ðÀÚ")]
+    public PartAnimation hat;
 
     public enum PlayerState
     {
@@ -17,12 +35,17 @@ public class PlayerAnimatorController : PlayerController
 
     public PlayerState currentState = PlayerState.Idle;
 
-    public  override void Update()
+    public override void Update()
     {
         base.Update();
-
         UpdateState();
-        UpdateAnimation();
+
+        UpdateAnimation(wheel1);
+        UpdateAnimation(wheel2);
+        UpdateAnimation(eye1);
+        UpdateAnimation(eye2);
+        UpdateAnimation(body);
+        UpdateAnimation(hat);
     }
 
     private void UpdateState()
@@ -41,21 +64,32 @@ public class PlayerAnimatorController : PlayerController
         }
     }
 
-    private void UpdateAnimation()
+    private void UpdateAnimation(PartAnimation part)
+    {
+        if (part == null || part.animationComponent == null) return;
+
+        AnimationClip clip = GetClipForState(part);
+        if (clip == null) return;
+
+        if (part.animationComponent.clip != clip)
+        {
+            part.animationComponent.clip = clip;
+        }
+
+        if (!part.animationComponent.IsPlaying(clip.name))
+        {
+            part.animationComponent.Play();
+        }
+    }
+
+    private AnimationClip GetClipForState(PartAnimation part)
     {
         switch (currentState)
         {
+            case PlayerState.Moving: return part.moveClip;
+            case PlayerState.Falling: return part.fallClip;
             case PlayerState.Idle:
-                // ¿¹½Ã: ´« ±ôºýÀÓ ¾Ö´Ï¸ÞÀÌ¼Ç
-                eyesRenderer.flipY = false;
-                break;
-            case PlayerState.Moving:
-                // ¿¹½Ã: ¹ÙÄû È¸Àü ½Ã°¢È­
-                wheelRenderer.transform.Rotate(Vector3.forward, -360 * Time.deltaTime);
-                break;
-            case PlayerState.Falling:
-                bodyRenderer.transform.localRotation = Quaternion.Euler(0, 0, 15f);
-                break;
+            default: return part.idleClip;
         }
     }
 }
