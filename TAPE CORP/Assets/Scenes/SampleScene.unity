@@ -492,7 +492,7 @@ MonoBehaviour:
   maxIslandRadius: 30
   noiseScale: 0.1
   monsterPrefab: {fileID: 0}
-  itemPrefab: {fileID: 1147401393624618485, guid: 077c4d38a56d4804db0593db41f35ea3, type: 3}
+  itemPrefab: {fileID: 7301289569975818838, guid: 64e47651b0bf99648a85b11a7f373735, type: 3}
   spawnParent: {fileID: 1725389847}
   useRandomSeed: 1
   seed: 0
@@ -788,7 +788,7 @@ MonoBehaviour:
   grabKey: 114
   grabMask:
     serializedVersion: 2
-    m_Bits: 256
+    m_Bits: 768
   lineObject: {fileID: 1359540952}
   lineRenderer: {fileID: 1359540951}
   lineCollider: {fileID: 1359540949}
@@ -1405,7 +1405,7 @@ MonoBehaviour:
   grabKey: 261
   grabMask:
     serializedVersion: 2
-    m_Bits: 128
+    m_Bits: 640
   lineObject: {fileID: 130291113}
   lineRenderer: {fileID: 130291112}
   lineCollider: {fileID: 130291110}
@@ -2023,7 +2023,7 @@ TilemapRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  - {fileID: 10306, guid: 0000000000000000f000000000000000, type: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -2638,9 +2638,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1725389847}
+  - component: {fileID: 1725389848}
   m_Layer: 0
   m_Name: "\uD0DD\uBC30"
-  m_TagString: Untagged
+  m_TagString: Box
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2660,6 +2661,47 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!68 &1725389848
+EdgeCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1725389846}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  m_EdgeRadius: 0
+  m_Points:
+  - {x: -0.5, y: 0}
+  - {x: 0.5, y: 0}
+  m_AdjacentStartPoint: {x: 0, y: 0}
+  m_AdjacentEndPoint: {x: 0, y: 0}
+  m_UseAdjacentStartPoint: 0
+  m_UseAdjacentEndPoint: 0
 --- !u!1 &1781711516
 GameObject:
   m_ObjectHideFlags: 0
