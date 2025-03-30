@@ -88,7 +88,11 @@ public class RulerController : MonoBehaviour
             }
         }
     }
-
+    void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(handle.position, 3f); // grabRange¿Í °°°Ô
+    }
     void TryGrabNearby()
     {
         Collider2D[] hits = Physics2D.OverlapCircleAll(handle.position, 1.5f, grabMask);
