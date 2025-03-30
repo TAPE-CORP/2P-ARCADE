@@ -52,6 +52,8 @@ public class RulerController : MonoBehaviour
         Vector3 p1 = handle.position;
         Vector3 p2 = originalParent.position;
 
+        Debug.Log($"U그망ㄴ럼니알pdateLine: p1={p1}, p2={p2}");
+
         if (lineRenderer != null)
         {
             lineRenderer.SetPosition(0, p1);
@@ -94,9 +96,9 @@ public class RulerController : MonoBehaviour
 
         foreach (var hit in hits)
         {
-            Debug.Log($"Checking {hit.name} with tag {hit.tag}");
+            Debug.Log($"으아앙악 {hit.name} with tag {hit.tag}");
 
-            if (!hit.CompareTag("Box") && !hit.CompareTag("Handle")) continue;
+            if (!hit.CompareTag("Box") && !hit.CompareTag("Handle") && !hit.CompareTag("Player")) continue;
 
             grabbedObject = FindParentWithNameContains(hit.transform, "player");
             if (grabbedObject == null)
@@ -127,7 +129,7 @@ public class RulerController : MonoBehaviour
         float dist = Vector2.Distance(handle.position, collision.transform.position);
         if (dist > 1.5f) return;
 
-        Debug.Log($"Trigger detected with: {collision.name}");
+        Debug.Log($"멀다고 이자식아: {collision.name}");
 
         if (collision.CompareTag("Box"))
         {
@@ -143,6 +145,7 @@ public class RulerController : MonoBehaviour
         }
         else if (collision.CompareTag("Handle"))
         {
+            Debug.Log($"잡아라!!!!!!!!!!!!!!!!! {collision.name}");
             grabbedObject = collision.transform;
             handle.SetParent(grabbedObject);
             isGrabbing = true;
@@ -268,7 +271,7 @@ public class RulerController : MonoBehaviour
         Transform current = child;
         while (current != null)
         {
-            if (current.name.Contains(keyword))
+            if (current.name.ToLower().Contains(keyword.ToLower())) // 대소문자 무시
                 return current;
             current = current.parent;
         }

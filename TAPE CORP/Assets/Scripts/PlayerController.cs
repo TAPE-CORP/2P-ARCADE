@@ -66,14 +66,6 @@ public class PlayerController : MonoBehaviour
         {
             rb.velocity = new Vector2(rb.velocity.x, jumpForce);
         }
-
-        // 상호작용
-        if (Input.GetKeyDown(interactKey) && interactionRuler != null)
-        {
-            float dist = Vector2.Distance(transform.position, targetToInteract.position);
-            if (dist < 1f)
-                interactionRuler.enabled = !interactionRuler.enabled;
-        }
     }
     public void OnCollisionEnter2D(Collision2D collision)
     {
