@@ -219,7 +219,7 @@ GameObject:
   - component: {fileID: 130291111}
   - component: {fileID: 130291112}
   - component: {fileID: 130291110}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: line
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -785,14 +785,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   handle: {fileID: 866291570}
-  grabKey: 265
+  grabKey: 114
   grabMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 256
   lineObject: {fileID: 1359540952}
   lineRenderer: {fileID: 1359540951}
   lineCollider: {fileID: 1359540949}
-  returnForcePower: 10
+  returnForcePower: 15
   playerKnockbackDirection: {x: -1, y: 0}
   playerKnockbackPower: 5
   pullDuration: 0.25
@@ -1199,7 +1199,7 @@ GameObject:
   - component: {fileID: 770184718}
   - component: {fileID: 770184721}
   - component: {fileID: 770184724}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: player1
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -1409,7 +1409,7 @@ MonoBehaviour:
   lineObject: {fileID: 130291113}
   lineRenderer: {fileID: 130291112}
   lineCollider: {fileID: 130291110}
-  returnForcePower: 10
+  returnForcePower: 15
   playerKnockbackDirection: {x: -1, y: 0}
   playerKnockbackPower: 10
   pullDuration: 0.25
@@ -1437,7 +1437,7 @@ GameObject:
   m_Component:
   - component: {fileID: 846684168}
   - component: {fileID: 846684169}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: eye_0 (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1763,7 +1763,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1004431928}
   - component: {fileID: 1004431929}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: wheel2_0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2341,7 +2341,7 @@ LineRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 0}
+  - {fileID: 10306, guid: 0000000000000000f000000000000000, type: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -2449,7 +2449,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1361444247}
   - component: {fileID: 1361444248}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: body
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2534,7 +2534,7 @@ GameObject:
   - component: {fileID: 1507025823}
   - component: {fileID: 1507025825}
   - component: {fileID: 1507025824}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: wheel1_0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2670,7 +2670,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1781711517}
   - component: {fileID: 1781711518}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: hat_0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2754,7 +2754,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1895447109}
   - component: {fileID: 1895447110}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: eye_0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2840,7 +2840,7 @@ GameObject:
   - component: {fileID: 2058367670}
   - component: {fileID: 2058367671}
   - component: {fileID: 2058367672}
-  m_Layer: 7
+  m_Layer: 8
   m_Name: handle
   m_TagString: Handle
   m_Icon: {fileID: 0}
