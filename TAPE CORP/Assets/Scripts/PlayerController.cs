@@ -2,74 +2,81 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    public float moveSpeed = 5f;
+    [Header("방향 고정 키 설정")]
+    public KeyCode directionLockKey = KeyCode.DownArrow; 
+    public float moveSpeed = 5f;            // 최대 속도
+    public float acceleration = 10f;        // 가속도
+    public float deceleration = 15f;        // 감속도
     public float jumpForce = 7f;
-    public bool isPlayerOne = true;
 
-    public Transform P1;
-    public Transform P2;
-    private Rigidbody2D rb;
-    private bool isGrounded;
+    public KeyCode leftKey = KeyCode.LeftArrow;
+    public KeyCode rightKey = KeyCode.RightArrow;
+    public KeyCode jumpKey = KeyCode.UpArrow;
+    public KeyCode interactKey = KeyCode.DownArrow;
 
-    public RulerController p1_TO_p2;
-    public RulerController p2_TO_p1;
-    private void Start()
+    public Transform targetToInteract;
+    public RulerController interactionRuler;
+
+    public Rigidbody2D rb;
+    public bool isGrounded;
+
+    private float currentVelocityX = 0f;
+
+    public virtual void Start()
     {
         rb = GetComponent<Rigidbody2D>();
     }
 
-    private void Update()
+    public virtual void Update()
     {
-        float move = 0f;
+        float targetVelocityX = 0f;
 
-        if (isPlayerOne)
+        // 방향 키 입력
+        if (Input.GetKey(leftKey))
+            targetVelocityX = -moveSpeed;
+        else if (Input.GetKey(rightKey))
+            targetVelocityX = moveSpeed;
+        // 방향 반전 (잡기 중이면 방향 고정)
+        bool isLocked = interactionRuler != null && interactionRuler.isGrabbing == true;
+
+        if (!isLocked)
         {
-            // 1P - 방향키
-            if (Input.GetKey(KeyCode.LeftArrow))
-                move = -1f;
-            else if (Input.GetKey(KeyCode.RightArrow))
-                move = 1f;
-
-            if (Input.GetKeyDown(KeyCode.UpArrow) && isGrounded)
-            {
-                rb.velocity = new Vector2(rb.velocity.x, jumpForce);
-            }
-            if (Input.GetKeyDown(KeyCode.DownArrow) && !p1_TO_p2.enabled && Vector2.Distance(P1.position, P2.position) < 1f)
-            {
-                p1_TO_p2.enabled = true;
-            }
-            else if (Input.GetKeyDown(KeyCode.DownArrow) && p1_TO_p2.enabled)
-            {
-                p1_TO_p2.enabled = false;
-            }
+            if (targetVelocityX > 0.1f)
+                transform.localScale = new Vector3(1, 1, 1);
+            else if (targetVelocityX < -0.1f)
+                transform.localScale = new Vector3(-1, 1, 1);
         }
-        else
+
+        // 관성 보간 처리
+        bool isMovingInput = Mathf.Abs(targetVelocityX) > 0.01f;
+        float appliedAccel = isMovingInput ? acceleration : deceleration;
+
+        currentVelocityX = Mathf.MoveTowards(currentVelocityX, targetVelocityX, appliedAccel * Time.deltaTime);
+
+        // 손 뗐을 때도 살짝 미끄러지게 유지
+        if (!isMovingInput && Mathf.Abs(currentVelocityX) < 0.05f)
         {
-            // 2P - WASD
-            if (Input.GetKey(KeyCode.A))
-                move = -1f;
-            else if (Input.GetKey(KeyCode.D))
-                move = 1f;
-
-            if (Input.GetKeyDown(KeyCode.W) && isGrounded)
-            {
-                rb.velocity = new Vector2(rb.velocity.x, jumpForce);
-            }
-            if (Input.GetKeyDown(KeyCode.S) && !p2_TO_p1.enabled && Vector2.Distance(P1.position, P2.position) < 1f)
-            {
-                p2_TO_p1.enabled = true;
-            }
-            else if (Input.GetKeyDown(KeyCode.S) && p2_TO_p1.enabled)
-            {
-                p2_TO_p1.enabled = false;
-            }
+            currentVelocityX = 0f; // 부드럽게 멈추게 보정
         }
-        rb.velocity = new Vector2(move * moveSpeed, rb.velocity.y);
+
+        rb.velocity = new Vector2(currentVelocityX, rb.velocity.y);
+
+        // 점프
+        if (Input.GetKeyDown(jumpKey) && isGrounded)
+        {
+            rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+        }
+
+        // 상호작용
+        if (Input.GetKeyDown(interactKey) && interactionRuler != null)
+        {
+            float dist = Vector2.Distance(transform.position, targetToInteract.position);
+            if (dist < 1f)
+                interactionRuler.enabled = !interactionRuler.enabled;
+        }
     }
-
-    private void OnCollisionEnter2D(Collision2D collision)
+    public void OnCollisionEnter2D(Collision2D collision)
     {
-        // 바닥에 닿았는지 체크
         foreach (ContactPoint2D contact in collision.contacts)
         {
             if (contact.normal.y > 0.5f)
@@ -80,9 +87,9 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void OnCollisionStay2D(Collision2D collision)
+
+    public void OnCollisionStay2D(Collision2D collision)
     {
-        // 접촉 유지 중에도 바닥이면 isGrounded 유지
         foreach (ContactPoint2D contact in collision.contacts)
         {
             if (contact.normal.y > 0.5f)
@@ -91,11 +98,10 @@ public class PlayerController : MonoBehaviour
                 return;
             }
         }
-
         isGrounded = false;
     }
 
-    private void OnCollisionExit2D(Collision2D collision)
+    public void OnCollisionExit2D(Collision2D collision)
     {
         isGrounded = false;
     }
