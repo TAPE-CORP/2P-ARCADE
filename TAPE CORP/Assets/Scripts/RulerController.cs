@@ -52,7 +52,7 @@ public class RulerController : MonoBehaviour
         Vector3 p1 = handle.position;
         Vector3 p2 = originalParent.position;
 
-        Debug.Log($"U그망ㄴ럼니알pdateLine: p1={p1}, p2={p2}");
+        Debug.Log($"선 생성pdateLine: p1={p1}, p2={p2}");
 
         if (lineRenderer != null)
         {

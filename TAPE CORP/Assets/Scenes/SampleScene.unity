@@ -207,6 +207,71 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!1 &125137843
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 125137845}
+  - component: {fileID: 125137844}
+  m_Layer: 0
+  m_Name: MapGen (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &125137844
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 125137843}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 335cffed9fd8b4744bc0b501729ed659, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tilemap: {fileID: 1313977763}
+  groundTile: {fileID: 11400000, guid: 0775fefba1c1dea44b57f1c22640cc4b, type: 2}
+  islandTile: {fileID: 11400000, guid: 16bb252fd258bc347b3a1b9495118db3, type: 2}
+  mapSize: {x: 200, y: 100}
+  playerJumpDistance: 5
+  playerJumpHeight: 2
+  players:
+  - {fileID: 770184714}
+  - {fileID: 516889316}
+  minIslandRadius: 20
+  maxIslandRadius: 25
+  noiseScale: 0.1
+  monsterPrefab: {fileID: 0}
+  itemPrefab: {fileID: 7301289569975818838, guid: 64e47651b0bf99648a85b11a7f373735, type: 3}
+  lightPrefab: {fileID: 0}
+  boxPrefab: {fileID: 1725389846}
+  doorPrefab: {fileID: 0}
+  groundObject: {fileID: 0}
+  spawnParent: {fileID: 1725389847}
+  useRandomSeed: 1
+  seed: 0
+--- !u!4 &125137845
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 125137843}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -100, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &130291109
 GameObject:
   m_ObjectHideFlags: 0
@@ -487,12 +552,12 @@ MonoBehaviour:
   islandTile: {fileID: 11400000, guid: 16bb252fd258bc347b3a1b9495118db3, type: 2}
   mapSize: {x: 200, y: 100}
   playerJumpDistance: 5
-  playerJumpHeight: 1
+  playerJumpHeight: 2
   players:
   - {fileID: 770184714}
   - {fileID: 516889316}
-  minIslandRadius: 13
-  maxIslandRadius: 30
+  minIslandRadius: 1
+  maxIslandRadius: 10
   noiseScale: 0.1
   monsterPrefab: {fileID: 0}
   itemPrefab: {fileID: 7301289569975818838, guid: 64e47651b0bf99648a85b11a7f373735, type: 3}
@@ -1038,8 +1103,9 @@ MonoBehaviour:
   - {fileID: 516889316}
   smoothTime: 0.2
   minZoom: 5
-  maxZoom: 6
-  zoomLimiter: 50
+  maxZoom: 20
+  zoomSpeed: 5
+  padding: 2
 --- !u!1 &619394800
 GameObject:
   m_ObjectHideFlags: 0
@@ -3045,4 +3111,5 @@ SceneRoots:
   - {fileID: 770184714}
   - {fileID: 516889316}
   - {fileID: 130596479}
+  - {fileID: 125137845}
   - {fileID: 1725389847}
