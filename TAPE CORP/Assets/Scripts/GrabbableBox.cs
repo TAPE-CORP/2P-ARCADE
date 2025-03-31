@@ -14,11 +14,7 @@ public class GrabbableBox : MonoBehaviour
             isGrabbed = true;
             Debug.Log("박스 잡힘!");
 
-            // 예시: 문 열기
-            if (targetDoor != null)
-            {
-                targetDoor.Open();
-            }
+       
         }
     }
 }
