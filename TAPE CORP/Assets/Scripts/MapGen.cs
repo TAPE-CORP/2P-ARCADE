@@ -4,13 +4,15 @@ using System.Collections.Generic;
 
 public class FloatingIslandsGenerator : MonoBehaviour
 {
+    [Header("맵/섬 설정")]
+    public Vector2Int mapSize = new Vector2Int(100, 100); // 전체 맵 크기
+    public Vector2Int mapOffset = new Vector2Int(0, 0);   // 시작 오프셋
+
     [Header("Tilemap 설정")]
     public Tilemap tilemap;
     public TileBase groundTile;       // 평탄한 바닥에 사용할 타일
     public TileBase islandTile;       // 섬(노드)에 사용할 타일
 
-    [Header("맵/섬 설정")]
-    public Vector2Int mapSize = new Vector2Int(100, 100); // 전체 맵 크기
 
     [Header("플레이어 점프 관련")]
     public float playerJumpDistance = 5f; // 최대 수평 점프 가능 거리
@@ -73,16 +75,17 @@ public class FloatingIslandsGenerator : MonoBehaviour
     {
         for (int x = 0; x < mapSize.x; x++)
         {
-            tilemap.SetTile(new Vector3Int(x, 0, 0), groundTile);
+            tilemap.SetTile(new Vector3Int(x + mapOffset.x, mapOffset.y, 0), groundTile);
         }
 
         if (groundObject)
         {
-            Vector3Int groundCell = new Vector3Int(mapSize.x - 1, 1, 0);
+            Vector3Int groundCell = new Vector3Int(mapOffset.x + mapSize.x - 1, mapOffset.y + 1, 0);
             Vector3 spawnPos = tilemap.CellToWorld(groundCell) + new Vector3(0.5f, 0.5f, 0);
             Instantiate(groundObject, spawnPos, Quaternion.identity, spawnParent);
         }
     }
+
 
     private void GenerateIslands()
     {
@@ -95,9 +98,9 @@ public class FloatingIslandsGenerator : MonoBehaviour
         while (currentX < mapSize.x)
         {
             float radius = Random.Range(minIslandRadius, maxIslandRadius);
-            float centerX = currentX + radius;
+            float centerX = currentX + radius + mapOffset.x;
             float deltaY = Random.Range(-playerJumpHeight, playerJumpHeight);
-            float centerY = Mathf.Clamp(lastCenterY + deltaY, minIslandY, mapSize.y - 1);
+            float centerY = Mathf.Clamp(lastCenterY + deltaY, minIslandY, mapSize.y - 1) + mapOffset.y;
             Vector2 center = new Vector2(centerX, centerY);
 
             int minX = Mathf.FloorToInt(centerX - radius);
@@ -111,7 +114,7 @@ public class FloatingIslandsGenerator : MonoBehaviour
             {
                 for (int y = minY; y <= maxY; y++)
                 {
-                    if (x < 0 || x >= mapSize.x || y < 0 || y >= mapSize.y)
+                    if (x < mapOffset.x || x >= mapOffset.x + mapSize.x || y < mapOffset.y || y >= mapOffset.y + mapSize.y)
                         continue;
 
                     float dx = (x - centerX) / radius;
@@ -125,13 +128,12 @@ public class FloatingIslandsGenerator : MonoBehaviour
                         float dynamicThreshold = threshold + dist * 0.2f;
                         if (noiseVal > dynamicThreshold)
                         {
-                            if (!(IsSurrounded(x, y))) // 아이템이 들어갈 공간 보장
+                            if (!IsSurrounded(x, y))
                             {
                                 tilemap.SetTile(new Vector3Int(x, y, 0), islandTile);
                                 tilePlaced[x - minX, y - minY] = true;
 
-                                // 천장이 생겼고, 아래에 땅이 있다면 라이트 설치
-                                if (y < mapSize.y - 1 && tilemap.HasTile(new Vector3Int(x, y - 1, 0)))
+                                if (y < mapOffset.y + mapSize.y - 1 && tilemap.HasTile(new Vector3Int(x, y - 1, 0)))
                                 {
                                     int horizontalClear = 0;
                                     for (int dxL = -2; dxL <= 2; dxL++)
@@ -162,22 +164,22 @@ public class FloatingIslandsGenerator : MonoBehaviour
                 Instantiate(monsterPrefab, spawnPosMonster, Quaternion.identity, spawnParent);
             }
 
-            currentX = centerX + radius + playerJumpDistance * Random.Range(0.8f, 1.3f);
-            lastCenterY = centerY;
+            currentX = centerX - mapOffset.x + radius + playerJumpDistance * Random.Range(0.8f, 1.3f);
+            lastCenterY = centerY - mapOffset.y;
         }
 
         if (boxPrefab)
         {
-            Vector3 boxPos = tilemap.CellToWorld(new Vector3Int(mapSize.x / 2, 4, 0)) + new Vector3(0.5f, 0.5f, 0);
+            Vector3 boxPos = tilemap.CellToWorld(new Vector3Int(mapOffset.x + mapSize.x / 2, mapOffset.y + 4, 0)) + new Vector3(0.5f, 0.5f, 0);
             Instantiate(boxPrefab, boxPos, Quaternion.identity, spawnParent);
         }
 
         if (doorPrefab)
         {
-            Vector3 doorPos = tilemap.CellToWorld(new Vector3Int(mapSize.x / 2 + 2, 4, 0)) + new Vector3(0.5f, 0.5f, 0);
+            Vector3 doorPos = tilemap.CellToWorld(new Vector3Int(mapOffset.x + mapSize.x / 2 + 2, mapOffset.y + 4, 0)) + new Vector3(0.5f, 0.5f, 0);
             Instantiate(doorPrefab, doorPos, Quaternion.identity, spawnParent);
         }
-        // 땅 위로 플레이어 올리기
+
         if (players != null)
         {
             foreach (var player in players)
@@ -189,7 +191,6 @@ public class FloatingIslandsGenerator : MonoBehaviour
             }
         }
 
-        // 박스도 모두 올리기
         if (boxPrefab)
         {
             foreach (Transform child in spawnParent)
@@ -203,6 +204,7 @@ public class FloatingIslandsGenerator : MonoBehaviour
 
         Debug.Log("공중 섬 생성 완!");
     }
+
 
     private bool IsSurrounded(int x, int y)
     {
