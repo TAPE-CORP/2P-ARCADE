@@ -218,7 +218,7 @@ GameObject:
   - component: {fileID: 125137845}
   - component: {fileID: 125137844}
   m_Layer: 0
-  m_Name: MapGen (1)
+  m_Name: "MapGen \uB9E8 \uC544\uB798"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -236,10 +236,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 335cffed9fd8b4744bc0b501729ed659, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mapSize: {x: 200, y: 50}
+  mapOffset: {x: -10, y: -20}
   tilemap: {fileID: 1313977763}
   groundTile: {fileID: 11400000, guid: 0775fefba1c1dea44b57f1c22640cc4b, type: 2}
   islandTile: {fileID: 11400000, guid: 16bb252fd258bc347b3a1b9495118db3, type: 2}
-  mapSize: {x: 200, y: 100}
   playerJumpDistance: 5
   playerJumpHeight: 2
   players:
@@ -248,13 +249,6 @@ MonoBehaviour:
   minIslandRadius: 20
   maxIslandRadius: 25
   noiseScale: 0.1
-  monsterPrefab: {fileID: 0}
-  itemPrefab: {fileID: 7301289569975818838, guid: 64e47651b0bf99648a85b11a7f373735, type: 3}
-  lightPrefab: {fileID: 0}
-  boxPrefab: {fileID: 1725389846}
-  doorPrefab: {fileID: 0}
-  groundObject: {fileID: 0}
-  spawnParent: {fileID: 1725389847}
   useRandomSeed: 1
   seed: 0
 --- !u!4 &125137845
@@ -514,7 +508,7 @@ GameObject:
   - component: {fileID: 130596479}
   - component: {fileID: 130596480}
   m_Layer: 0
-  m_Name: MapGen
+  m_Name: "MapGen \uC2E4\uC9C8\uC801 "
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -547,10 +541,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 335cffed9fd8b4744bc0b501729ed659, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mapSize: {x: 200, y: 100}
+  mapOffset: {x: 50, y: 20}
   tilemap: {fileID: 1313977763}
   groundTile: {fileID: 11400000, guid: 0775fefba1c1dea44b57f1c22640cc4b, type: 2}
   islandTile: {fileID: 11400000, guid: 16bb252fd258bc347b3a1b9495118db3, type: 2}
-  mapSize: {x: 200, y: 100}
   playerJumpDistance: 5
   playerJumpHeight: 2
   players:
@@ -559,13 +554,6 @@ MonoBehaviour:
   minIslandRadius: 1
   maxIslandRadius: 10
   noiseScale: 0.1
-  monsterPrefab: {fileID: 0}
-  itemPrefab: {fileID: 7301289569975818838, guid: 64e47651b0bf99648a85b11a7f373735, type: 3}
-  lightPrefab: {fileID: 0}
-  boxPrefab: {fileID: 1725389846}
-  doorPrefab: {fileID: 0}
-  groundObject: {fileID: 0}
-  spawnParent: {fileID: 1725389847}
   useRandomSeed: 1
   seed: 0
 --- !u!1 &272526097
@@ -1103,7 +1091,7 @@ MonoBehaviour:
   - {fileID: 516889316}
   smoothTime: 0.2
   minZoom: 5
-  maxZoom: 20
+  maxZoom: 30
   zoomSpeed: 5
   padding: 2
 --- !u!1 &619394800
@@ -1145,6 +1133,65 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &738144137
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 738144139}
+  - component: {fileID: 738144138}
+  m_Layer: 0
+  m_Name: "MapGen \uC704\uC5D0 \uCE35"
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &738144138
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 738144137}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 335cffed9fd8b4744bc0b501729ed659, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mapSize: {x: 200, y: 100}
+  mapOffset: {x: 50, y: 50}
+  tilemap: {fileID: 1313977763}
+  groundTile: {fileID: 11400000, guid: 0775fefba1c1dea44b57f1c22640cc4b, type: 2}
+  islandTile: {fileID: 11400000, guid: 16bb252fd258bc347b3a1b9495118db3, type: 2}
+  playerJumpDistance: 5
+  playerJumpHeight: 2
+  players:
+  - {fileID: 770184714}
+  - {fileID: 516889316}
+  minIslandRadius: 20
+  maxIslandRadius: 25
+  noiseScale: 0.1
+  useRandomSeed: 1
+  seed: 0
+--- !u!4 &738144139
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 738144137}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -100, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2702,79 +2749,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!1 &1725389846
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1725389847}
-  - component: {fileID: 1725389848}
-  m_Layer: 0
-  m_Name: "\uD0DD\uBC30"
-  m_TagString: Box
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1725389847
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1725389846}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 33.114395, y: 18.080975, z: -7.825388}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!68 &1725389848
-EdgeCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1725389846}
-  m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
-  m_EdgeRadius: 0
-  m_Points:
-  - {x: -0.5, y: 0}
-  - {x: 0.5, y: 0}
-  m_AdjacentStartPoint: {x: 0, y: 0}
-  m_AdjacentEndPoint: {x: 0, y: 0}
-  m_UseAdjacentStartPoint: 0
-  m_UseAdjacentEndPoint: 0
 --- !u!1 &1781711516
 GameObject:
   m_ObjectHideFlags: 0
@@ -3112,4 +3086,4 @@ SceneRoots:
   - {fileID: 516889316}
   - {fileID: 130596479}
   - {fileID: 125137845}
-  - {fileID: 1725389847}
+  - {fileID: 738144139}

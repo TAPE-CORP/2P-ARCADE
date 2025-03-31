@@ -5,36 +5,27 @@ using System.Collections.Generic;
 public class FloatingIslandsGenerator : MonoBehaviour
 {
     [Header("맵/섬 설정")]
-    public Vector2Int mapSize = new Vector2Int(100, 100); // 전체 맵 크기
-    public Vector2Int mapOffset = new Vector2Int(0, 0);   // 시작 오프셋
+    public Vector2Int mapSize = new Vector2Int(100, 100);
+    public Vector2Int mapOffset = new Vector2Int(0, 0);
 
     [Header("Tilemap 설정")]
     public Tilemap tilemap;
-    public TileBase groundTile;       // 평탄한 바닥에 사용할 타일
-    public TileBase islandTile;       // 섬(노드)에 사용할 타일
-
+    public TileBase groundTile;
+    public TileBase islandTile;
 
     [Header("플레이어 점프 관련")]
-    public float playerJumpDistance = 5f; // 최대 수평 점프 가능 거리
-    public float playerJumpHeight = 3f;   // 최대 수직 점프 가능 거리
+    public float playerJumpDistance = 5f;
+    public float playerJumpHeight = 3f;
+
     [Header("플레이어 리스트")]
     public List<Transform> players;
 
     [Header("섬 설정")]
-    public float minIslandRadius = 3f; // 섬의 최소 반경
-    public float maxIslandRadius = 8f; // 섬의 최대 반경
+    public float minIslandRadius = 3f;
+    public float maxIslandRadius = 8f;
 
     [Header("Perlin 노이즈")]
-    public float noiseScale = 0.1f;   // 노이즈 스케일 (값이 클수록 노이즈 변화가 큼)
-
-    [Header("오브젝트 프리팹 (선택)")]
-    public GameObject monsterPrefab;
-    public GameObject itemPrefab;
-    public GameObject lightPrefab;
-    public GameObject boxPrefab;
-    public GameObject doorPrefab;
-    public GameObject groundObject;
-    public Transform spawnParent;
+    public float noiseScale = 0.1f;
 
     [Header("랜덤 시드")]
     public bool useRandomSeed = true;
@@ -51,13 +42,12 @@ public class FloatingIslandsGenerator : MonoBehaviour
     private void GenerateWorld()
     {
         Debug.Log("월드 생성 시작...");
-
         GenerateGround();
         GenerateIslands();
-
         tilemap.RefreshAllTiles();
         Debug.Log("월드 생성 완료!");
     }
+
     private Vector3 SnapAboveGround(Vector3 worldPosition)
     {
         Vector3Int cell = tilemap.WorldToCell(worldPosition);
@@ -68,7 +58,7 @@ public class FloatingIslandsGenerator : MonoBehaviour
                 return tilemap.CellToWorld(new Vector3Int(cell.x, y + 1, 0)) + new Vector3(0.5f, 0.5f, 0);
             }
         }
-        return worldPosition; // 못 찾았으면 원래 위치
+        return worldPosition;
     }
 
     private void GenerateGround()
@@ -77,15 +67,7 @@ public class FloatingIslandsGenerator : MonoBehaviour
         {
             tilemap.SetTile(new Vector3Int(x + mapOffset.x, mapOffset.y, 0), groundTile);
         }
-
-        if (groundObject)
-        {
-            Vector3Int groundCell = new Vector3Int(mapOffset.x + mapSize.x - 1, mapOffset.y + 1, 0);
-            Vector3 spawnPos = tilemap.CellToWorld(groundCell) + new Vector3(0.5f, 0.5f, 0);
-            Instantiate(groundObject, spawnPos, Quaternion.identity, spawnParent);
-        }
     }
-
 
     private void GenerateIslands()
     {
@@ -108,8 +90,6 @@ public class FloatingIslandsGenerator : MonoBehaviour
             int minY = Mathf.FloorToInt(centerY - radius);
             int maxY = Mathf.CeilToInt(centerY + radius);
 
-            bool[,] tilePlaced = new bool[maxX - minX + 1, maxY - minY + 1];
-
             for (int x = minX; x <= maxX; x++)
             {
                 for (int y = minY; y <= maxY; y++)
@@ -126,58 +106,20 @@ public class FloatingIslandsGenerator : MonoBehaviour
                         float noiseVal = Mathf.PerlinNoise((x + seed) * noiseScale, (y + seed) * noiseScale);
                         float threshold = 0.5f;
                         float dynamicThreshold = threshold + dist * 0.2f;
+
                         if (noiseVal > dynamicThreshold)
                         {
                             if (!IsSurrounded(x, y))
                             {
                                 tilemap.SetTile(new Vector3Int(x, y, 0), islandTile);
-                                tilePlaced[x - minX, y - minY] = true;
-
-                                if (y < mapOffset.y + mapSize.y - 1 && tilemap.HasTile(new Vector3Int(x, y - 1, 0)))
-                                {
-                                    int horizontalClear = 0;
-                                    for (int dxL = -2; dxL <= 2; dxL++)
-                                    {
-                                        if (tilemap.HasTile(new Vector3Int(x + dxL, y, 0)))
-                                            horizontalClear++;
-                                    }
-                                    if (horizontalClear >= 5 && lightPrefab != null)
-                                    {
-                                        Vector3 lightPos = tilemap.CellToWorld(new Vector3Int(x, y, 0)) + new Vector3(0.5f, 0.5f, 0);
-                                        Instantiate(lightPrefab, lightPos, Quaternion.identity, spawnParent);
-                                    }
-                                }
                             }
                         }
                     }
                 }
             }
 
-            Vector3Int islandCenterCell = new Vector3Int(Mathf.RoundToInt(centerX), Mathf.RoundToInt(centerY), 0);
-            Vector3 spawnPosCenter = tilemap.CellToWorld(islandCenterCell) + new Vector3(0.5f, 0.5f, 0);
-            if (itemPrefab)
-                Instantiate(itemPrefab, spawnPosCenter, Quaternion.identity, spawnParent);
-
-            if (monsterPrefab && Random.value < 0.5f)
-            {
-                Vector3 spawnPosMonster = spawnPosCenter + new Vector3(-0.3f, 0.3f, 0f);
-                Instantiate(monsterPrefab, spawnPosMonster, Quaternion.identity, spawnParent);
-            }
-
             currentX = centerX - mapOffset.x + radius + playerJumpDistance * Random.Range(0.8f, 1.3f);
             lastCenterY = centerY - mapOffset.y;
-        }
-
-        if (boxPrefab)
-        {
-            Vector3 boxPos = tilemap.CellToWorld(new Vector3Int(mapOffset.x + mapSize.x / 2, mapOffset.y + 4, 0)) + new Vector3(0.5f, 0.5f, 0);
-            Instantiate(boxPrefab, boxPos, Quaternion.identity, spawnParent);
-        }
-
-        if (doorPrefab)
-        {
-            Vector3 doorPos = tilemap.CellToWorld(new Vector3Int(mapOffset.x + mapSize.x / 2 + 2, mapOffset.y + 4, 0)) + new Vector3(0.5f, 0.5f, 0);
-            Instantiate(doorPrefab, doorPos, Quaternion.identity, spawnParent);
         }
 
         if (players != null)
@@ -191,20 +133,8 @@ public class FloatingIslandsGenerator : MonoBehaviour
             }
         }
 
-        if (boxPrefab)
-        {
-            foreach (Transform child in spawnParent)
-            {
-                if (child.CompareTag("Box"))
-                {
-                    child.position = SnapAboveGround(child.position);
-                }
-            }
-        }
-
         Debug.Log("공중 섬 생성 완!");
     }
-
 
     private bool IsSurrounded(int x, int y)
     {
@@ -218,6 +148,6 @@ public class FloatingIslandsGenerator : MonoBehaviour
             if (tilemap.HasTile(new Vector3Int(x, y, 0) + dir))
                 solidCount++;
         }
-        return solidCount >= 4; // 사방이 막힌 경우 true
+        return solidCount >= 4;
     }
 }

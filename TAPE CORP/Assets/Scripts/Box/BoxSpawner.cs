@@ -1,0 +1,61 @@
+using UnityEngine;
+using UnityEngine.Tilemaps;
+using System.Collections;
+
+public class BoxSpawner : MonoBehaviour
+{
+    [Header("박스 프리팹")]
+    public GameObject boxPrefab;
+    public Tilemap groundTilemap;
+
+    [Header("스폰 범위")]
+    public float xStart = 0f;
+    public float xEnd = 10f;
+    public float ySpawn = 20f;
+
+    [Header("생성 설정")]
+    public int boxCount = 5;
+    public Vector2 correctBoxSize = new Vector2(1.5f, 2.5f);
+    public Vector2 minBoxSize = new Vector2(0.8f, 1.0f);
+    public Vector2 maxBoxSize = new Vector2(2.0f, 3.0f);
+
+    private void Start()
+    {
+        SpawnAllBoxes();
+    }
+
+    private void SpawnAllBoxes()
+    {
+        // 정답박스 인덱스를 랜덤하게 선택
+        int correctIndex = Random.Range(0, boxCount);
+
+        for (int i = 0; i < boxCount; i++)
+        {
+            float xPos = Random.Range(xStart, xEnd);
+            Vector3 spawnPos = new Vector3(xPos, ySpawn, 0f);
+
+            GameObject box = Instantiate(boxPrefab, spawnPos, Quaternion.identity);
+
+            // 사이즈 설정
+            Vector2 size;
+            if (i == correctIndex)
+            {
+                size = correctBoxSize;
+                box.name = "box정답박스";
+            }
+            else
+            {
+                float width = Random.Range(minBoxSize.x, maxBoxSize.x);
+                float height = Random.Range(minBoxSize.y, maxBoxSize.y);
+                size = new Vector2(width, height);
+            }
+
+            box.transform.localScale = new Vector3(size.x, size.y, 1f);
+
+            // groundTilemap 연결 (선택)
+            Box boxScript = box.GetComponent<Box>();
+            if (boxScript != null)
+                boxScript.groundTilemap = groundTilemap;
+        }
+    }
+}
