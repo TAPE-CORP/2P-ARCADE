@@ -1026,7 +1026,7 @@ MonoBehaviour:
   lineCollider: {fileID: 1359540949}
   returnForcePower: 15
   playerKnockbackDirection: {x: -1, y: 0}
-  playerKnockbackPower: 5
+  playerKnockbackPower: 10
   pullDuration: 0.25
   isGrabbing: 0
   stretchLength: 0
@@ -2232,7 +2232,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1008009594
 Transform:
   m_ObjectHideFlags: 0
@@ -3628,7 +3628,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1984443582}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f02a0f011a8343b4789ae077083b36a6, type: 3}
   m_Name: 
