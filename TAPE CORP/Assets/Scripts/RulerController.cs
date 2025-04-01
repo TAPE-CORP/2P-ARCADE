@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using TMPro;
 
 public class RulerController : MonoBehaviour
 {
@@ -7,6 +8,9 @@ public class RulerController : MonoBehaviour
     public Transform handle;
     public KeyCode grabKey = KeyCode.Space;
     public LayerMask grabMask;
+
+    [Header("TMP 텍스트 설정")]
+    public TMP_Text stretchLengthText; //  줄자 길이 표시 텍스트
 
     [Header("줄자 효과 (Line 오브젝트 내에 있음)")]
     public Transform lineObject;
@@ -45,29 +49,8 @@ public class RulerController : MonoBehaviour
             lineCollider.enabled = false;
         }
 
-        Debug.Log("RulerController initialized.");
-    }
-    void UpdateLine()
-    {
-        Vector3 p1 = handle.position;
-        Vector3 p2 = originalParent.position;
-
-        Debug.Log($"선 생성pdateLine: p1={p1}, p2={p2}");
-
-        if (lineRenderer != null)
-        {
-            lineRenderer.SetPosition(0, p1);
-            lineRenderer.SetPosition(1, p2);
-        }
-
-        if (lineCollider != null)
-        {
-            lineCollider.points = new Vector2[]
-            {
-            lineObject.InverseTransformPoint(p1),
-            lineObject.InverseTransformPoint(p2)
-            };
-        }
+        if (stretchLengthText != null)
+            stretchLengthText.text = "0.0m";
     }
     void Update()
     {
@@ -79,14 +62,43 @@ public class RulerController : MonoBehaviour
         if (isGrabbing)
         {
             UpdateLine();
-            stretchLength = Vector2.Distance(handle.position, originalParent.position);
 
             if (!Input.GetKey(grabKey))
             {
-                Debug.Log("Grab released.");
                 Release();
             }
         }
+        else
+        {
+            if (stretchLengthText != null)
+                stretchLengthText.text = "0.0m";
+        }
+    }
+
+    void UpdateLine()
+    {
+        Vector3 p1 = handle.position;
+        Vector3 p2 = originalParent.position;
+
+        if (lineRenderer != null)
+        {
+            lineRenderer.SetPosition(0, p1);
+            lineRenderer.SetPosition(1, p2);
+        }
+
+        if (lineCollider != null)
+        {
+            lineCollider.points = new Vector2[]
+            {
+                lineObject.InverseTransformPoint(p1),
+                lineObject.InverseTransformPoint(p2)
+            };
+        }
+
+        // 실제 길이 표시
+        stretchLength = Vector2.Distance(p1, p2);
+        if (stretchLengthText != null)
+            stretchLengthText.text = stretchLength.ToString("F2") + "m";
     }
     void OnDrawGizmos()
     {
