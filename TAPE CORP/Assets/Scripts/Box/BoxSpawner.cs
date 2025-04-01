@@ -1,26 +1,23 @@
-using UnityEngine;
-using UnityEngine.Tilemaps;
+ï»¿using UnityEngine;
 using TMPro;
 
 public class BoxSpawner : MonoBehaviour
 {
-    [Header("¹Ú½º ÇÁ¸®ÆÕ")]
+    [Header("ë°•ìŠ¤ í”„ë¦¬íŒ¹")]
     public GameObject boxPrefab;
-    public Tilemap groundTilemap;
 
-    [Header("Á¤´ä¹Ú½º Å©±â Ç¥½Ã TMP ÅØ½ºÆ®")]
+    [Header("ì •ë‹µë°•ìŠ¤ í¬ê¸° í‘œì‹œ TMP í…ìŠ¤íŠ¸")]
     public TMP_Text correctBoxText;
 
-    [Header("½ºÆù ¹üÀ§")]
+    [Header("ìŠ¤í° ë²”ìœ„")]
     public float xStart = 0f;
     public float xEnd = 10f;
     public float ySpawn = 20f;
 
-    [Header("»ı¼º ¼³Á¤")]
+    [Header("ìƒì„± ì„¤ì •")]
     public int boxCount = 5;
-    public Vector2 correctBoxSize = new Vector2(1.5f, 2.5f);
-    public Vector2 minBoxSize = new Vector2(0.8f, 1.0f);
-    public Vector2 maxBoxSize = new Vector2(2.0f, 3.0f);
+    public Vector2 minBoxScale = new Vector2(0.8f, 1.0f);
+    public Vector2 maxBoxScale = new Vector2(2.0f, 3.0f);
 
     private void Start()
     {
@@ -38,35 +35,16 @@ public class BoxSpawner : MonoBehaviour
 
             GameObject box = Instantiate(boxPrefab, spawnPos, Quaternion.identity);
 
-            Vector2 size;
+            // âœ… ìŠ¤í”„ë¼ì´íŠ¸ í¬ê¸°ë§Œ ì¡°ì ˆ
+            float scaleX = Random.Range(minBoxScale.x, maxBoxScale.x);
+            float scaleY = Random.Range(minBoxScale.y, maxBoxScale.y);
+            box.transform.localScale = new Vector3(scaleX, scaleY, 1f);
+
+            // âœ… ì •ë‹µë°•ìŠ¤ ì²˜ë¦¬
             if (i == correctIndex)
             {
-                size = correctBoxSize;
-                box.name = "boxÁ¤´ä¹Ú½º";
-            }
-            else
-            {
-                float width = Random.Range(minBoxSize.x, maxBoxSize.x);
-                float height = Random.Range(minBoxSize.y, maxBoxSize.y);
-                size = new Vector2(width, height);
-            }
+                box.name = "boxì •ë‹µë°•ìŠ¤";
 
-            //  ¹Ú½º Å©±â ¼³Á¤ (localScaleÀº 1·Î °íÁ¤ÇÏ°í, size¸¸ Á¶Á¤)
-            box.transform.localScale = Vector3.one;
-
-            BoxCollider2D col = box.GetComponent<BoxCollider2D>();
-            if (col != null)
-            {
-                col.size = size;
-            }
-
-            Box boxScript = box.GetComponent<Box>();
-            if (boxScript != null)
-                boxScript.groundTilemap = groundTilemap;
-
-            //  Á¤´ä¹Ú½º ÅØ½ºÆ® Ç¥½Ã
-            if (i == correctIndex)
-            {
                 BoxSizeDisplay sizeDisplay = box.GetComponent<BoxSizeDisplay>();
                 if (sizeDisplay != null && correctBoxText != null)
                 {
