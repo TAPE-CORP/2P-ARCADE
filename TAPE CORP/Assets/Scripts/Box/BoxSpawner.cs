@@ -1,9 +1,4 @@
-<<<<<<< HEAD
-using UnityEngine;
-using UnityEngine.Tilemaps;
-=======
 ï»¿using UnityEngine;
->>>>>>> main
 using TMPro;
 
 public class BoxSpawner : MonoBehaviour
@@ -11,17 +6,10 @@ public class BoxSpawner : MonoBehaviour
     [Header("ë°•ìŠ¤ í”„ë¦¬íŒ¹")]
     public GameObject boxPrefab;
 
-<<<<<<< HEAD
-    [Header("Á¤´ä¹Ú½º Å©±â Ç¥½Ã TMP ÅØ½ºÆ®")]
-    public TMP_Text correctBoxText;
-
-    [Header("½ºÆù ¹üÀ§")]
-=======
     [Header("ì •ë‹µë°•ìŠ¤ í¬ê¸° í‘œì‹œ TMP í…ìŠ¤íŠ¸")]
     public TMP_Text correctBoxText;
 
     [Header("ìŠ¤í° ë²”ìœ„")]
->>>>>>> main
     public float xStart = 0f;
     public float xEnd = 10f;
     public float ySpawn = 20f;
@@ -50,16 +38,12 @@ public class BoxSpawner : MonoBehaviour
 
             GameObject box = Instantiate(boxPrefab, spawnPos, Quaternion.identity);
 
-<<<<<<< HEAD
-            Vector2 size;
-=======
             // âœ… ëžœë¤ ìŠ¤ì¼€ì¼ ì„¤ì •
             float scaleX = Random.Range(minBoxScale.x, maxBoxScale.x);
             float scaleY = Random.Range(minBoxScale.y, maxBoxScale.y);
             Vector3 scale = new Vector3(scaleX, scaleY, 1f);
             box.transform.localScale = scale;
 
->>>>>>> main
             if (i == correctIndex)
             {
                 box.name = "boxì •ë‹µë°•ìŠ¤";
@@ -73,31 +57,6 @@ public class BoxSpawner : MonoBehaviour
                 }
             }
 
-<<<<<<< HEAD
-            //  ¹Ú½º Å©±â ¼³Á¤ (localScaleÀº 1·Î °íÁ¤ÇÏ°í, size¸¸ Á¶Á¤)
-            box.transform.localScale = Vector3.one;
-
-            BoxCollider2D col = box.GetComponent<BoxCollider2D>();
-            if (col != null)
-            {
-                col.size = size;
-            }
-
-            Box boxScript = box.GetComponent<Box>();
-            if (boxScript != null)
-                boxScript.groundTilemap = groundTilemap;
-
-            //  Á¤´ä¹Ú½º ÅØ½ºÆ® Ç¥½Ã
-            if (i == correctIndex)
-            {
-                BoxSizeDisplay sizeDisplay = box.GetComponent<BoxSizeDisplay>();
-                if (sizeDisplay != null && correctBoxText != null)
-                {
-                    sizeDisplay.SetSizeTextTarget(correctBoxText);
-                }
-            }
-=======
->>>>>>> main
         }
     }
 }

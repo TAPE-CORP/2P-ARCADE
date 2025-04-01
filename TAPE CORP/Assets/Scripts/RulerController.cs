@@ -58,17 +58,6 @@ public class RulerController : MonoBehaviour
         {
             TryGrabNearby();
         }
-<<<<<<< HEAD
-
-        if (isGrabbing)
-        {
-            UpdateLine();
-
-            if (!Input.GetKey(grabKey))
-            {
-                Release();
-            }
-=======
 
         if (isGrabbing)
         {
@@ -116,39 +105,7 @@ public class RulerController : MonoBehaviour
             Vector3 localScale = stretchLengthText.transform.localScale;
             localScale.x = (parentLossy.x < 0) ? -1f : 1f;
             stretchLengthText.transform.localScale = localScale;
->>>>>>> main
         }
-        else
-        {
-            if (stretchLengthText != null)
-                stretchLengthText.text = "0.0m";
-        }
-    }
-
-    void UpdateLine()
-    {
-        Vector3 p1 = handle.position;
-        Vector3 p2 = originalParent.position;
-
-        if (lineRenderer != null)
-        {
-            lineRenderer.SetPosition(0, p1);
-            lineRenderer.SetPosition(1, p2);
-        }
-
-        if (lineCollider != null)
-        {
-            lineCollider.points = new Vector2[]
-            {
-                lineObject.InverseTransformPoint(p1),
-                lineObject.InverseTransformPoint(p2)
-            };
-        }
-
-        // 실제 길이 표시
-        stretchLength = Vector2.Distance(p1, p2);
-        if (stretchLengthText != null)
-            stretchLengthText.text = stretchLength.ToString("F2") + "m";
     }
 
 

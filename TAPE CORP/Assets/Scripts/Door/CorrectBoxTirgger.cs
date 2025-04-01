@@ -1,14 +1,3 @@
-<<<<<<< HEAD
-using UnityEngine;
-
-public class CorrectBoxTrigger : MonoBehaviour
-{
-    [Header("¹®Æ² ÀÚ½Ä ¿ä¼Ò")]
-    public Transform doorButton;
-    public Transform door;
-
-    [Header("ÀÌµ¿ ¼³Á¤")]
-=======
 ï»¿using UnityEngine;
 
 public class CorrectBoxTrigger : MonoBehaviour
@@ -18,7 +7,6 @@ public class CorrectBoxTrigger : MonoBehaviour
     public Transform door;
 
     [Header("ì´ë™ ì„¤ì •")]
->>>>>>> main
     public float moveAmount = 0.1f;
     public float moveSpeed = 5f;
 
@@ -49,11 +37,7 @@ public class CorrectBoxTrigger : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-<<<<<<< HEAD
-        if (other.name.Contains("boxÁ¤´ä¹Ú½º"))
-=======
         if (other.name.Contains("boxì •ë‹µë°•ìŠ¤"))
->>>>>>> main
         {
             isCorrectBoxAbove = true;
         }
@@ -61,11 +45,7 @@ public class CorrectBoxTrigger : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D other)
     {
-<<<<<<< HEAD
-        if (other.name.Contains("boxÁ¤´ä¹Ú½º"))
-=======
         if (other.name.Contains("boxì •ë‹µë°•ìŠ¤"))
->>>>>>> main
         {
             isCorrectBoxAbove = false;
         }

@@ -720,14 +720,9 @@ GameObject:
   - component: {fileID: 309091958}
   - component: {fileID: 309091957}
   - component: {fileID: 309091956}
-<<<<<<< HEAD
-  - component: {fileID: 309091960}
-  - component: {fileID: 309091961}
-=======
   - component: {fileID: 309091961}
   - component: {fileID: 309091962}
   - component: {fileID: 309091963}
->>>>>>> main
   m_Layer: 9
   m_Name: box
   m_TagString: Box
@@ -842,9 +837,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-<<<<<<< HEAD
---- !u!61 &309091960
-=======
 --- !u!114 &309091961
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -858,7 +850,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!61 &309091962
->>>>>>> main
 BoxCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -899,19 +890,11 @@ BoxCollider2D:
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
-<<<<<<< HEAD
-  m_AutoTiling: 0
-  serializedVersion: 2
-  m_Size: {x: 0.51, y: 0.99}
-  m_EdgeRadius: 0
---- !u!114 &309091961
-=======
   m_AutoTiling: 1
   serializedVersion: 2
   m_Size: {x: 0.51, y: 0.99}
   m_EdgeRadius: 0
 --- !u!114 &309091963
->>>>>>> main
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -920,9 +903,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 309091955}
   m_Enabled: 1
   m_EditorHideFlags: 0
-<<<<<<< HEAD
-  m_Script: {fileID: 11500000, guid: 786db231e6efb7d4394ca20349105bbd, type: 3}
-=======
   m_Script: {fileID: 11500000, guid: 1e1c3c78af4e2104290609cf2b45653a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
@@ -1108,7 +1088,6 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 373822d8c83746f4b8611d96d5b2a047, type: 3}
->>>>>>> main
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &488709378
@@ -1491,10 +1470,7 @@ MonoBehaviour:
   grabMask:
     serializedVersion: 2
     m_Bits: 768
-<<<<<<< HEAD
-=======
   stretchLengthText: {fileID: 1705430221}
->>>>>>> main
   lineObject: {fileID: 1359540952}
   lineRenderer: {fileID: 1359540951}
   lineCollider: {fileID: 1359540949}
@@ -1604,10 +1580,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children:
-<<<<<<< HEAD
-=======
   - {fileID: 1705430220}
->>>>>>> main
   - {fileID: 68436513}
   - {fileID: 272526098}
   - {fileID: 488709379}
@@ -2036,11 +2009,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 770184712}
   serializedVersion: 2
-<<<<<<< HEAD
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-=======
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
->>>>>>> main
   m_LocalPosition: {x: 3, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
@@ -2053,10 +2022,7 @@ Transform:
   - {fileID: 1507025823}
   - {fileID: 1004431928}
   - {fileID: 130291113}
-<<<<<<< HEAD
-=======
   - {fileID: 320955605}
->>>>>>> main
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!58 &770184715
@@ -2184,10 +2150,7 @@ MonoBehaviour:
   grabMask:
     serializedVersion: 2
     m_Bits: 640
-<<<<<<< HEAD
-=======
   stretchLengthText: {fileID: 320955606}
->>>>>>> main
   lineObject: {fileID: 130291113}
   lineRenderer: {fileID: 130291112}
   lineCollider: {fileID: 130291110}
@@ -2923,13 +2886,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49cbc7961952f664f8ddf980166808ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-<<<<<<< HEAD
-  xStart: 50
-  xEnd: 70
-=======
   xStart: 10
   xEnd: 20
->>>>>>> main
   ySpawn: 100
   rb: {fileID: 1008009596}
 --- !u!1 &1195184697
@@ -3872,8 +3830,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1f1918ab59301ad4688e11268fd48228, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-<<<<<<< HEAD
-=======
 --- !u!1 &1705430219
 GameObject:
   m_ObjectHideFlags: 0
@@ -4058,7 +4014,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 373822d8c83746f4b8611d96d5b2a047, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
->>>>>>> main
 --- !u!1 &1781711516
 GameObject:
   m_ObjectHideFlags: 0
@@ -4173,24 +4128,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   boxPrefab: {fileID: 309091955}
-<<<<<<< HEAD
-  groundTilemap: {fileID: 1313977763}
-=======
->>>>>>> main
   correctBoxText: {fileID: 514324300}
   xStart: 10
   xEnd: 60
   ySpawn: 20
   boxCount: 3
-<<<<<<< HEAD
-  correctBoxSize: {x: 1.5, y: 2.5}
-  minBoxSize: {x: 0.8, y: 1}
-  maxBoxSize: {x: 2, y: 3}
-=======
   minBoxScale: {x: 1, y: 3}
   maxBoxScale: {x: 5, y: 4}
   correctBoxActualSize: {x: 0, y: 0}
->>>>>>> main
 --- !u!4 &1836592843
 Transform:
   m_ObjectHideFlags: 0
