@@ -1,12 +1,15 @@
 using UnityEngine;
 using UnityEngine.Tilemaps;
-using System.Collections;
+using TMPro;
 
 public class BoxSpawner : MonoBehaviour
 {
     [Header("박스 프리팹")]
     public GameObject boxPrefab;
     public Tilemap groundTilemap;
+
+    [Header("정답박스 크기 표시 TMP 텍스트")]
+    public TMP_Text correctBoxText;
 
     [Header("스폰 범위")]
     public float xStart = 0f;
@@ -26,7 +29,6 @@ public class BoxSpawner : MonoBehaviour
 
     private void SpawnAllBoxes()
     {
-        // 정답박스 인덱스를 랜덤하게 선택
         int correctIndex = Random.Range(0, boxCount);
 
         for (int i = 0; i < boxCount; i++)
@@ -36,7 +38,6 @@ public class BoxSpawner : MonoBehaviour
 
             GameObject box = Instantiate(boxPrefab, spawnPos, Quaternion.identity);
 
-            // 사이즈 설정
             Vector2 size;
             if (i == correctIndex)
             {
@@ -52,10 +53,19 @@ public class BoxSpawner : MonoBehaviour
 
             box.transform.localScale = new Vector3(size.x, size.y, 1f);
 
-            // groundTilemap 연결 (선택)
             Box boxScript = box.GetComponent<Box>();
             if (boxScript != null)
                 boxScript.groundTilemap = groundTilemap;
+
+            // 정답박스 텍스트 표시 연결
+            if (i == correctIndex)
+            {
+                BoxSizeDisplay sizeDisplay = box.GetComponent<BoxSizeDisplay>();
+                if (sizeDisplay != null && correctBoxText != null)
+                {
+                    sizeDisplay.SetSizeTextTarget(correctBoxText);
+                }
+            }
         }
     }
 }
