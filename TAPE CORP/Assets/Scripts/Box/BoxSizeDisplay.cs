@@ -1,6 +1,7 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using TMPro;
 
+[RequireComponent(typeof(BoxCollider2D))]
 public class BoxSizeDisplay : MonoBehaviour
 {
     private BoxCollider2D col;
@@ -14,20 +15,19 @@ public class BoxSizeDisplay : MonoBehaviour
     public void SetSizeTextTarget(TMP_Text target)
     {
         sizeText = target;
-        UpdateSizeText();
+        UpdateSizeText(); // âœ… í…ìŠ¤íŠ¸ ê°±ì‹ ì€ ì—¬ê¸°ì„œ ì¦‰ì‹œ ì‹¤í–‰
     }
 
     public void UpdateSizeText()
     {
         if (col != null && sizeText != null)
         {
-            // ½ÇÁ¦ ¿ùµå Å©±â ¹İ¿µ
-            Vector2 size = new Vector2(
-                col.size.x * transform.lossyScale.x,
-                col.size.y * transform.lossyScale.y
-            );
-
+            Vector2 size = col.size;
             sizeText.text = $"{size.x:F1} * {size.y:F1}";
+        }
+        else
+        {
+            Debug.LogWarning("BoxSizeDisplay: sizeText ë˜ëŠ” colì´ nullì…ë‹ˆë‹¤.");
         }
     }
 }

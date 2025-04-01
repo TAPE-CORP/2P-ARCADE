@@ -1,26 +1,26 @@
-using UnityEngine;
-using UnityEngine.Tilemaps;
+Ôªøusing UnityEngine;
 using TMPro;
 
 public class BoxSpawner : MonoBehaviour
 {
-    [Header("π⁄Ω∫ «¡∏Æ∆’")]
+    [Header("Î∞ïÏä§ ÌîÑÎ¶¨Ìåπ")]
     public GameObject boxPrefab;
-    public Tilemap groundTilemap;
 
-    [Header("¡§¥‰π⁄Ω∫ ≈©±‚ «•Ω√ TMP ≈ÿΩ∫∆Æ")]
+    [Header("Ï†ïÎãµÎ∞ïÏä§ ÌÅ¨Í∏∞ ÌëúÏãú TMP ÌÖçÏä§Ìä∏")]
     public TMP_Text correctBoxText;
 
-    [Header("Ω∫∆˘ π¸¿ß")]
+    [Header("Ïä§Ìè∞ Î≤îÏúÑ")]
     public float xStart = 0f;
     public float xEnd = 10f;
     public float ySpawn = 20f;
 
-    [Header("ª˝º∫ º≥¡§")]
+    [Header("ÏÉùÏÑ± ÏÑ§Ï†ï")]
     public int boxCount = 5;
-    public Vector2 correctBoxSize = new Vector2(1.5f, 2.5f);
-    public Vector2 minBoxSize = new Vector2(0.8f, 1.0f);
-    public Vector2 maxBoxSize = new Vector2(2.0f, 3.0f);
+    public Vector2 minBoxScale = new Vector2(0.8f, 1.0f);
+    public Vector2 maxBoxScale = new Vector2(2.0f, 3.0f);
+
+    [Header("ÎîîÎ≤ÑÍ∑∏")]
+    [SerializeField] private Vector2 correctBoxActualSize;
 
     private void Start()
     {
@@ -38,41 +38,25 @@ public class BoxSpawner : MonoBehaviour
 
             GameObject box = Instantiate(boxPrefab, spawnPos, Quaternion.identity);
 
-            Vector2 size;
+            // ‚úÖ ÎûúÎç§ Ïä§ÏºÄÏùº ÏÑ§Ï†ï
+            float scaleX = Random.Range(minBoxScale.x, maxBoxScale.x);
+            float scaleY = Random.Range(minBoxScale.y, maxBoxScale.y);
+            Vector3 scale = new Vector3(scaleX, scaleY, 1f);
+            box.transform.localScale = scale;
+
             if (i == correctIndex)
             {
-                size = correctBoxSize;
-                box.name = "box¡§¥‰π⁄Ω∫";
-            }
-            else
-            {
-                float width = Random.Range(minBoxSize.x, maxBoxSize.x);
-                float height = Random.Range(minBoxSize.y, maxBoxSize.y);
-                size = new Vector2(width, height);
-            }
+                box.name = "boxÏ†ïÎãµÎ∞ïÏä§";
 
-            //  π⁄Ω∫ ≈©±‚ º≥¡§ (localScale¿∫ 1∑Œ ∞Ì¡§«œ∞Ì, size∏∏ ¡∂¡§)
-            box.transform.localScale = Vector3.one;
-
-            BoxCollider2D col = box.GetComponent<BoxCollider2D>();
-            if (col != null)
-            {
-                col.size = size;
-            }
-
-            Box boxScript = box.GetComponent<Box>();
-            if (boxScript != null)
-                boxScript.groundTilemap = groundTilemap;
-
-            //  ¡§¥‰π⁄Ω∫ ≈ÿΩ∫∆Æ «•Ω√
-            if (i == correctIndex)
-            {
-                BoxSizeDisplay sizeDisplay = box.GetComponent<BoxSizeDisplay>();
-                if (sizeDisplay != null && correctBoxText != null)
+                SpriteRenderer sr = box.GetComponent<SpriteRenderer>();
+                if (sr != null && correctBoxText != null)
                 {
-                    sizeDisplay.SetSizeTextTarget(correctBoxText);
+                    Vector2 worldSize = sr.bounds.size;
+                    correctBoxActualSize = worldSize;
+                    correctBoxText.text = $"{worldSize.x:F1} * {worldSize.y:F1}";
                 }
             }
+
         }
     }
 }
