@@ -90,16 +90,25 @@ public class RulerController : MonoBehaviour
         {
             lineCollider.points = new Vector2[]
             {
-                lineObject.InverseTransformPoint(p1),
-                lineObject.InverseTransformPoint(p2)
+            lineObject.InverseTransformPoint(p1),
+            lineObject.InverseTransformPoint(p2)
             };
         }
 
-        // 실제 길이 표시
         stretchLength = Vector2.Distance(p1, p2);
+
         if (stretchLengthText != null)
+        {
             stretchLengthText.text = stretchLength.ToString("F2") + "m";
+
+            Vector3 parentLossy = stretchLengthText.transform.parent.lossyScale;
+            Vector3 localScale = stretchLengthText.transform.localScale;
+            localScale.x = (parentLossy.x < 0) ? -1f : 1f;
+            stretchLengthText.transform.localScale = localScale;
+        }
     }
+
+
     void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
