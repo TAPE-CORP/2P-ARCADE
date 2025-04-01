@@ -35,7 +35,6 @@ public class ParallaxManager : MonoBehaviour
         UpdateParallax();
         RecycleBackgrounds();
 
-        // 카메라 사이즈가 바뀌면 배경 재설정
         float currentWidth = GetCameraWidth();
         if (!Mathf.Approximately(currentWidth, lastCameraWidth))
         {
@@ -54,7 +53,7 @@ public class ParallaxManager : MonoBehaviour
         backgroundWidth = sr.bounds.size.x;
 
         float viewWidth = GetCameraWidth();
-        backgroundCount = Mathf.CeilToInt(viewWidth / backgroundWidth) + 2; // 여유분 +2
+        backgroundCount = Mathf.CeilToInt(viewWidth / backgroundWidth) + 4; // 여유분 +4로 증가
 
         for (int i = 0; i < backgroundCount; i++)
         {
@@ -67,7 +66,6 @@ public class ParallaxManager : MonoBehaviour
 
     void ResetBackgrounds()
     {
-        // 기존 배경 삭제
         foreach (GameObject bg in backgrounds)
         {
             Destroy(bg);
@@ -79,12 +77,14 @@ public class ParallaxManager : MonoBehaviour
 
     void UpdateParallax()
     {
-        foreach (GameObject bg in backgrounds)
+        float camPosX = mainCamera.transform.position.x;
+
+        for (int i = 0; i < backgrounds.Count; i++)
         {
-            float camPosX = mainCamera.transform.position.x;
-            float offsetX = camPosX * parallaxFactor;
-            Vector3 targetPos = new Vector3(offsetX, bg.transform.position.y, bg.transform.position.z);
-            bg.transform.position = targetPos;
+            GameObject bg = backgrounds[i];
+            float targetX = Mathf.Floor((camPosX - (backgroundCount / 2f - i) * backgroundWidth * (1 - parallaxFactor)) / backgroundWidth) * backgroundWidth;
+            float offsetX = targetX + (camPosX * parallaxFactor);
+            bg.transform.position = new Vector3(offsetX, bg.transform.position.y, bg.transform.position.z);
         }
     }
 
