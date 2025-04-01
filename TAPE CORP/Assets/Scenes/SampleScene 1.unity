@@ -241,7 +241,7 @@ MonoBehaviour:
   tilemap: {fileID: 1313977763}
   groundTile: {fileID: 11400000, guid: 0775fefba1c1dea44b57f1c22640cc4b, type: 2}
   islandTile: {fileID: 11400000, guid: 16bb252fd258bc347b3a1b9495118db3, type: 2}
-  playerJumpDistance: 5
+  playerJumpDistance: 2
   playerJumpHeight: 2
   players:
   - {fileID: 770184714}
@@ -546,12 +546,12 @@ MonoBehaviour:
   tilemap: {fileID: 1313977763}
   groundTile: {fileID: 11400000, guid: 0775fefba1c1dea44b57f1c22640cc4b, type: 2}
   islandTile: {fileID: 11400000, guid: 16bb252fd258bc347b3a1b9495118db3, type: 2}
-  playerJumpDistance: 5
+  playerJumpDistance: 2
   playerJumpHeight: 2
   players:
   - {fileID: 770184714}
   - {fileID: 516889316}
-  minIslandRadius: 1
+  minIslandRadius: 5
   maxIslandRadius: 10
   noiseScale: 0.1
   useRandomSeed: 1
@@ -1596,7 +1596,7 @@ MonoBehaviour:
   tilemap: {fileID: 1313977763}
   groundTile: {fileID: 11400000, guid: 0775fefba1c1dea44b57f1c22640cc4b, type: 2}
   islandTile: {fileID: 11400000, guid: 16bb252fd258bc347b3a1b9495118db3, type: 2}
-  playerJumpDistance: 5
+  playerJumpDistance: 2
   playerJumpHeight: 2
   players:
   - {fileID: 770184714}
@@ -2507,6 +2507,7 @@ GameObject:
   - component: {fileID: 1008009597}
   - component: {fileID: 1008009596}
   - component: {fileID: 1008009598}
+  - component: {fileID: 1008009599}
   m_Layer: 0
   m_Name: door_frame
   m_TagString: Untagged
@@ -2668,6 +2669,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4afd308b201241447adae60bd709b088, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  doorButton: {fileID: 1984443583}
+  door: {fileID: 1559704528}
+  moveAmount: 0.1
+  moveSpeed: 5
+--- !u!114 &1008009599
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1008009593}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49cbc7961952f664f8ddf980166808ed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  xStart: 50
+  xEnd: 70
+  ySpawn: 100
+  rb: {fileID: 1008009596}
 --- !u!1 &1195184697
 GameObject:
   m_ObjectHideFlags: 0

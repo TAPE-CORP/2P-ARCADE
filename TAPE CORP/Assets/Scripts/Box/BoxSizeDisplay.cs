@@ -21,7 +21,12 @@ public class BoxSizeDisplay : MonoBehaviour
     {
         if (col != null && sizeText != null)
         {
-            Vector2 size = col.size;
+            // 실제 월드 크기 반영
+            Vector2 size = new Vector2(
+                col.size.x * transform.lossyScale.x,
+                col.size.y * transform.lossyScale.y
+            );
+
             sizeText.text = $"{size.x:F1} * {size.y:F1}";
         }
     }

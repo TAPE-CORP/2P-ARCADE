@@ -51,13 +51,20 @@ public class BoxSpawner : MonoBehaviour
                 size = new Vector2(width, height);
             }
 
-            box.transform.localScale = new Vector3(size.x, size.y, 1f);
+            //  박스 크기 설정 (localScale은 1로 고정하고, size만 조정)
+            box.transform.localScale = Vector3.one;
+
+            BoxCollider2D col = box.GetComponent<BoxCollider2D>();
+            if (col != null)
+            {
+                col.size = size;
+            }
 
             Box boxScript = box.GetComponent<Box>();
             if (boxScript != null)
                 boxScript.groundTilemap = groundTilemap;
 
-            // 정답박스 텍스트 표시 연결
+            //  정답박스 텍스트 표시
             if (i == correctIndex)
             {
                 BoxSizeDisplay sizeDisplay = box.GetComponent<BoxSizeDisplay>();
