@@ -19,6 +19,9 @@ public class BoxSpawner : MonoBehaviour
     public Vector2 minBoxScale = new Vector2(0.8f, 1.0f);
     public Vector2 maxBoxScale = new Vector2(2.0f, 3.0f);
 
+    [Header("디버그")]
+    [SerializeField] private Vector2 correctBoxActualSize;
+
     private void Start()
     {
         SpawnAllBoxes();
@@ -35,22 +38,25 @@ public class BoxSpawner : MonoBehaviour
 
             GameObject box = Instantiate(boxPrefab, spawnPos, Quaternion.identity);
 
-            // ✅ 스프라이트 크기만 조절
+            // ✅ 랜덤 스케일 설정
             float scaleX = Random.Range(minBoxScale.x, maxBoxScale.x);
             float scaleY = Random.Range(minBoxScale.y, maxBoxScale.y);
-            box.transform.localScale = new Vector3(scaleX, scaleY, 1f);
+            Vector3 scale = new Vector3(scaleX, scaleY, 1f);
+            box.transform.localScale = scale;
 
-            // ✅ 정답박스 처리
             if (i == correctIndex)
             {
                 box.name = "box정답박스";
 
-                BoxSizeDisplay sizeDisplay = box.GetComponent<BoxSizeDisplay>();
-                if (sizeDisplay != null && correctBoxText != null)
+                SpriteRenderer sr = box.GetComponent<SpriteRenderer>();
+                if (sr != null && correctBoxText != null)
                 {
-                    sizeDisplay.SetSizeTextTarget(correctBoxText);
+                    Vector2 worldSize = sr.bounds.size;
+                    correctBoxActualSize = worldSize;
+                    correctBoxText.text = $"{worldSize.x:F1} * {worldSize.y:F1}";
                 }
             }
+
         }
     }
 }
