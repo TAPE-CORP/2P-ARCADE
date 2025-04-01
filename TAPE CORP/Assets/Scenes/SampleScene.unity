@@ -1892,7 +1892,7 @@ MonoBehaviour:
   rightKey: 275
   jumpKey: 273
   interactKey: 274
-  targetToInteract: {fileID: 0}
+  targetToInteract: {fileID: 516889316}
   interactionRuler: {fileID: 770184723}
   rb: {fileID: 770184716}
   isGrounded: 0
@@ -3051,6 +3051,57 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!1 &1390688369
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1390688370}
+  - component: {fileID: 1390688371}
+  m_Layer: 0
+  m_Name: BackGround
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1390688370
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1390688369}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1390688371
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1390688369}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39a5aed7c4977e8418e9c3010c1fca37, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mainCamera: {fileID: 519420031}
+  parallaxFactor: 0.5
+  backgroundPrefab: {fileID: 8977774102158845232, guid: 4865e23f0d181364998d0ec95e4a8a99, type: 3}
+  backgroundCount: 3
+  objectPrefab: {fileID: 2340595510983805713, guid: b3e7ea0b64a47e14aba1016e51a4c302, type: 3}
+  objectCount: 10
+  spacing: 5
 --- !u!1 &1507025822
 GameObject:
   m_ObjectHideFlags: 0
@@ -3620,3 +3671,4 @@ SceneRoots:
   - {fileID: 309091959}
   - {fileID: 60091495}
   - {fileID: 2028188607}
+  - {fileID: 1390688370}
