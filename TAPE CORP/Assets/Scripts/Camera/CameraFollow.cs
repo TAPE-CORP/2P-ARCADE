@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(Camera))]
 public class MultiTargetCamera : MonoBehaviour
 {
     [Header("≈∏∞ŸµÈ")]
@@ -12,8 +13,10 @@ public class MultiTargetCamera : MonoBehaviour
 
     [Header("¡‹ º≥¡§")]
     public float minZoom = 5f;
-    public float maxZoom = 15f;
-    public float zoomLimiter = 50f;
+    public float maxZoom = 20f;
+    public float zoomSpeed = 5f;
+    public float padding = 2f;
+
     private Camera cam;
 
     void Start()
@@ -40,19 +43,23 @@ public class MultiTargetCamera : MonoBehaviour
 
     void Zoom()
     {
-        float greatestDistance = GetGreatestDistance();
-        float newZoom = Mathf.Lerp(maxZoom, minZoom, greatestDistance / zoomLimiter);
-        cam.orthographicSize = Mathf.Lerp(cam.orthographicSize, newZoom, Time.deltaTime);
+        float requiredSize = GetRequiredSize();
+        float targetZoom = Mathf.Clamp(requiredSize, minZoom, maxZoom);
+        cam.orthographicSize = Mathf.Lerp(cam.orthographicSize, targetZoom, Time.deltaTime * zoomSpeed);
     }
 
-    float GetGreatestDistance()
+    float GetRequiredSize()
     {
         var bounds = new Bounds(targets[0].position, Vector3.zero);
         for (int i = 1; i < targets.Count; i++)
         {
             bounds.Encapsulate(targets[i].position);
         }
-        return bounds.size.x > bounds.size.y ? bounds.size.x : bounds.size.y;
+
+        float height = bounds.size.y;
+        float width = bounds.size.x / cam.aspect;
+
+        return Mathf.Max(height, width) / 2f + padding;
     }
 
     Vector3 GetCenterPoint()

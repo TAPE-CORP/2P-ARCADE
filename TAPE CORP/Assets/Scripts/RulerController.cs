@@ -52,6 +52,8 @@ public class RulerController : MonoBehaviour
         Vector3 p1 = handle.position;
         Vector3 p2 = originalParent.position;
 
+        Debug.Log($"선 생성pdateLine: p1={p1}, p2={p2}");
+
         if (lineRenderer != null)
         {
             lineRenderer.SetPosition(0, p1);
@@ -86,7 +88,11 @@ public class RulerController : MonoBehaviour
             }
         }
     }
-
+    void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(handle.position, 3f); // grabRange와 같게
+    }
     void TryGrabNearby()
     {
         Collider2D[] hits = Physics2D.OverlapCircleAll(handle.position, 1.5f, grabMask);
@@ -94,28 +100,57 @@ public class RulerController : MonoBehaviour
 
         foreach (var hit in hits)
         {
-            Debug.Log($"Checking {hit.name} with tag {hit.tag}");
+            Debug.Log($"으아앙악 {hit.name} with tag {hit.tag}");
 
-            if (!hit.CompareTag("Box") && !hit.CompareTag("Handle")) continue;
+            if (!hit.CompareTag("Box") && !hit.CompareTag("Handle") && !hit.CompareTag("Player")) continue;
 
-            grabbedObject = FindParentWithNameContains(hit.transform, "player");
-            if (grabbedObject == null)
+            if (hit.CompareTag("Box"))
             {
-                Debug.LogWarning("No player root found!");
-                continue;
+                grabbedObject = FindParentWithNameContains(hit.transform, "box");
+                if (grabbedObject == null)
+                {
+                    Debug.LogWarning("No box root found!");
+                    continue;
+                }
+
+                grabbedObject.SetParent(handle);
+
+                float boxHalfWidth = grabbedObject.GetComponent<SpriteRenderer>().bounds.size.x * 0.5f;
+                grabbedObject.localPosition = new Vector3(boxHalfWidth + 0.2f, 0f, 0f);
+
+                //  박스의 물리 제어 끄기
+                Rigidbody2D rb = grabbedObject.GetComponent<Rigidbody2D>();
+                if (rb != null)
+                    rb.isKinematic = true;
+
+                isGrabbing = true;
+
+                // 줄 없음
+                lineRenderer?.SetPositions(new Vector3[2]);
+                lineRenderer.enabled = false;
+                lineCollider.enabled = false;
+            }
+            else // Player 또는 Handle일 경우
+            {
+                grabbedObject = FindParentWithNameContains(hit.transform, "player");
+                if (grabbedObject == null)
+                {
+                    Debug.LogWarning("No player root found!");
+                    continue;
+                }
+
+                handle.SetParent(grabbedObject);
+                isGrabbing = true;
+
+                if (lineRenderer != null) lineRenderer.enabled = true;
+                if (lineCollider != null) lineCollider.enabled = true;
+
+                UpdateLine();
             }
 
-            handle.SetParent(grabbedObject);
-            isGrabbing = true;
-
-            if (lineRenderer != null) lineRenderer.enabled = true;
-            if (lineCollider != null) lineCollider.enabled = true;
-
-            UpdateLine();
-            break;
+            break; // 첫 대상만 잡고 종료
         }
     }
-
 
     void OnTriggerStay2D(Collider2D collision)
     {
@@ -127,22 +162,27 @@ public class RulerController : MonoBehaviour
         float dist = Vector2.Distance(handle.position, collision.transform.position);
         if (dist > 1.5f) return;
 
-        Debug.Log($"Trigger detected with: {collision.name}");
+        Debug.Log($"멀다고 이자식아: {collision.name}");
 
         if (collision.CompareTag("Box"))
         {
             grabbedObject = collision.transform;
             grabbedObject.SetParent(handle);
-            grabbedObject.localPosition = Vector3.zero;
+
+            // 붙이기 위치 조정
+            float boxHalfWidth = grabbedObject.GetComponent<SpriteRenderer>().bounds.size.x * 0.5f;
+            grabbedObject.localPosition = new Vector3(boxHalfWidth + 0.2f, 0f, 0f);
+
             isGrabbing = true;
 
             if (lineRenderer != null) lineRenderer.enabled = true;
             if (lineCollider != null) lineCollider.enabled = true;
 
-            UpdateLine(); // 첫 줄 생성 확실히 보장
+            UpdateLine();
         }
         else if (collision.CompareTag("Handle"))
         {
+            Debug.Log($"잡아라!!!!!!!!!!!!!!!!! {collision.name}");
             grabbedObject = collision.transform;
             handle.SetParent(grabbedObject);
             isGrabbing = true;
@@ -161,27 +201,35 @@ public class RulerController : MonoBehaviour
         if (lineRenderer != null) lineRenderer.enabled = true; // 줄 유지
         if (lineCollider != null) lineCollider.enabled = true;
 
-        // 핸들 부모만 복귀 (위치는 천천히 이동)
+        // 핸들 원래대로 복귀
         handle.SetParent(originalParent);
         StartCoroutine(SmoothHandleReturn());
 
         if (grabbedObject != null)
         {
             Rigidbody2D rb = grabbedObject.GetComponent<Rigidbody2D>();
-            Vector3 pullTarget = originalParent.position;
 
-            if (rb != null)
-            {
-                Vector2 dir = (pullTarget - grabbedObject.position).normalized;
-                float dist = Vector2.Distance(pullTarget, grabbedObject.position);
-                rb.AddForce(dir * dist * returnForcePower, ForceMode2D.Impulse);
-                Debug.Log($"Rebound force applied: {dir * dist * returnForcePower}");
-            }
-
+            //  Box일 경우: 부모 끊고 물리 다시 켜기
             if (grabbedObject.parent == handle)
             {
                 grabbedObject.SetParent(null);
+
+                if (rb != null)
+                    rb.isKinematic = false;
+
                 Debug.Log("Box was attached to handle, now detached.");
+            }
+            else // Player일 경우: 반동 처리
+            {
+                Vector3 pullTarget = originalParent.position;
+
+                if (rb != null)
+                {
+                    Vector2 dir = (pullTarget - grabbedObject.position).normalized;
+                    float dist = Vector2.Distance(pullTarget, grabbedObject.position);
+                    rb.AddForce(dir * dist * returnForcePower, ForceMode2D.Impulse);
+                    Debug.Log($"Rebound force applied: {dir * dist * returnForcePower}");
+                }
             }
         }
 
@@ -268,7 +316,7 @@ public class RulerController : MonoBehaviour
         Transform current = child;
         while (current != null)
         {
-            if (current.name.Contains(keyword))
+            if (current.name.ToLower().Contains(keyword.ToLower())) // 대소문자 무시
                 return current;
             current = current.parent;
         }
