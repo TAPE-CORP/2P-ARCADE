@@ -72,15 +72,29 @@ public class ParallaxLayer : MonoBehaviour
                 int gridX = x - tileCountX / 2;
                 int gridY = y - tileCountY / 2;
 
-                // 카메라 기준 타일 좌표
                 float baseX = (Mathf.Floor(camPos.x / tileWidth) + gridX) * tileWidth;
                 float baseY = (Mathf.Floor(camPos.y / tileHeight) + gridY) * tileHeight;
 
-                // 패럴럭스로 밀릴 거리 계산 → 반대로 보정
                 float offsetX = baseX + (camPos.x * (parallaxFactor - 1f));
                 float offsetY = baseY + (camPos.y * (parallaxFactor - 1f));
 
-                tiles[index].transform.position = new Vector3(offsetX, offsetY, zOffset);
+                GameObject tile = tiles[index];
+                tile.transform.position = new Vector3(offsetX, offsetY, zOffset);
+
+                // 공기 원근 효과 적용
+                SpriteRenderer sr = tile.GetComponent<SpriteRenderer>();
+                if (sr != null)
+                {
+                    float distanceFactor = 1f - Mathf.Clamp01(parallaxFactor); // 0.0 = 가장 가까움, 1.0 = 가장 멀리
+                    Color baseColor = Color.white;
+                    baseColor.a = Mathf.Lerp(1f, 0.5f, distanceFactor); // 멀수록 투명
+                    baseColor.r = Mathf.Lerp(1f, 0.8f, distanceFactor); // 멀수록 붉은기 줄어듦
+                    baseColor.g = Mathf.Lerp(1f, 0.9f, distanceFactor); // 채도 감소
+                    baseColor.b = Mathf.Lerp(1f, 1f, distanceFactor);   // 블루는 유지
+
+                    sr.color = baseColor;
+                }
+
                 index++;
             }
         }
