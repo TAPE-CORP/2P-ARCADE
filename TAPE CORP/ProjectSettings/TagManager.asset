@@ -10,15 +10,15 @@ TagManager:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Map
   - Water
   - UI
   - Ground
   - Grab2P
   - Grab1P
   - Box
-  - 
-  - 
+  - BackGround
+  - Bridge
   - 
   - 
   - 
