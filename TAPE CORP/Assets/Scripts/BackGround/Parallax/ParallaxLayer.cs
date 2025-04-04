@@ -45,8 +45,8 @@ public class ParallaxLayer : MonoBehaviour
         float parallaxShiftX = Mathf.Abs(parallaxFactor - 1f) * camWidth;
         float parallaxShiftY = Mathf.Abs(parallaxFactor - 1f) * camHeight;
 
-        tileCountX = Mathf.CeilToInt((camWidth + parallaxShiftX) / tileWidth) + 50;
-        tileCountY = Mathf.CeilToInt((camHeight + parallaxShiftY) / tileHeight) + 50;
+        tileCountX = Mathf.CeilToInt((camWidth + parallaxShiftX) / tileWidth) + 13;
+        tileCountY = Mathf.CeilToInt((camHeight + parallaxShiftY) / tileHeight) + 8;
 
         for (int y = 0; y < tileCountY; y++)
         {

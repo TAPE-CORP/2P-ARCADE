@@ -5,29 +5,64 @@ public class WorkerMover : MonoBehaviour
     public float moveSpeed = 3f;
     private Vector3 targetPosition;
     private bool isMoving = false;
+    private bool hasLanded = false;
 
     private Animator animator;
     private SpriteRenderer spriteRenderer;
-
-    private float outOfCameraTimer = 0f; // 카메라 밖에 머문 시간
+    private float outOfCameraTimer = 0f;
 
     void Start()
     {
         animator = GetComponent<Animator>();
         spriteRenderer = GetComponent<SpriteRenderer>();
+
+        // 같은 Worker 레이어끼리 충돌 무시
+        int workerLayer = LayerMask.NameToLayer("Worker");
+        Physics2D.IgnoreLayerCollision(workerLayer, workerLayer);
+
+        // Rigidbody 안정화
+        if (TryGetComponent(out Rigidbody2D rb))
+        {
+            rb.freezeRotation = true;
+        }
     }
 
-    public void MoveTo(Vector3 target)
+    public void MoveHorizontallyAcrossScreen2D()
     {
-        moveSpeed = Random.Range(3f, 5f);
-        targetPosition = target;
+        moveSpeed = Random.Range(2f, 4f);
+
+        bool moveRight = Random.value > 0.5f;
+        float moveDistance = 30f;
+        float direction = moveRight ? 1f : -1f;
+
+        targetPosition = transform.position + new Vector3(direction * moveDistance, 0f, 0f);
         isMoving = true;
 
         if (animator != null)
             animator.SetBool("IsMoving", true);
 
-        Vector3 dir = target - transform.position;
-        GetComponent<SpriteRenderer>().flipX = dir.x < 0f;
+        if (spriteRenderer != null)
+            spriteRenderer.flipX = direction < 0f;
+    }
+
+    void OnEnable()
+    {
+        // 상태 초기화
+        isMoving = false;
+        hasLanded = false;
+        outOfCameraTimer = 0f;
+
+        if (animator != null)
+            animator.SetBool("IsMoving", false);
+    }
+
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (!hasLanded && collision.collider.CompareTag("Bridge"))
+        {
+            hasLanded = true;
+            MoveHorizontallyAcrossScreen2D();
+        }
     }
 
     void Update()
@@ -36,17 +71,16 @@ public class WorkerMover : MonoBehaviour
 
         transform.position = Vector3.MoveTowards(transform.position, targetPosition, moveSpeed * Time.deltaTime);
 
-        // 카메라 밖 체크
         if (IsInCameraView())
         {
-            outOfCameraTimer = 0f; // 안에 들어왔으면 리셋
+            outOfCameraTimer = 0f;
         }
         else
         {
             outOfCameraTimer += Time.deltaTime;
             if (outOfCameraTimer >= 1f)
             {
-                Destroy(gameObject); // 1초 이상 밖에 있었으면 제거
+                ReturnToPool();
                 return;
             }
         }
@@ -58,7 +92,7 @@ public class WorkerMover : MonoBehaviour
             if (animator != null)
                 animator.SetBool("IsMoving", false);
 
-            Destroy(gameObject, 0.5f);
+            Invoke(nameof(ReturnToPool), 0.5f);
         }
     }
 
@@ -66,5 +100,10 @@ public class WorkerMover : MonoBehaviour
     {
         Vector3 vp = Camera.main.WorldToViewportPoint(transform.position);
         return vp.x >= 0 && vp.x <= 1 && vp.y >= 0 && vp.y <= 1 && vp.z >= 0;
+    }
+
+    void ReturnToPool()
+    {
+        WorkerPoolManager.Instance.ReturnWorker(gameObject);
     }
 }

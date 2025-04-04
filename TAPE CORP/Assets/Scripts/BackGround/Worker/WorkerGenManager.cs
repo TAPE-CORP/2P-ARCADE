@@ -5,10 +5,12 @@ using UnityEngine;
 public class WorkerGenManager : MonoBehaviour
 {
     public Camera mainCamera;
-    public GameObject prefabA;
     public int spawnCount = 5;
-    public LayerMask bridgeLayer;
-    public float checkInterval = 0.5f;
+    public float checkInterval = 1f;
+
+    [Header("스폰 거리 설정 (카메라 기준)")]
+    public float minSpawnDistanceFromCamera = 5f;  // 최소 거리
+    public float maxSpawnDistanceFromCamera = 15f; // 최대 거리
 
     private List<GameObject> activeAObjects = new List<GameObject>();
 
@@ -22,7 +24,7 @@ public class WorkerGenManager : MonoBehaviour
 
     IEnumerator SpawnRoutine()
     {
-        yield return new WaitForSeconds(1f); // 시작 1초 후 실행
+        yield return new WaitForSeconds(1f);
 
         while (true)
         {
@@ -33,18 +35,10 @@ public class WorkerGenManager : MonoBehaviour
 
     void CheckAndRespawn()
     {
+        // 비활성화되었거나 null인 오브젝트 제거
         for (int i = activeAObjects.Count - 1; i >= 0; i--)
         {
-            if (activeAObjects[i] == null)
-            {
-                activeAObjects.RemoveAt(i);
-                continue;
-            }
-
-            WorkerMover mover = activeAObjects[i].GetComponent<WorkerMover>();
-
-            // 카메라에 들어온 적 있고, 현재 카메라 밖이면 제거
-            if (activeAObjects[i] == null)
+            if (activeAObjects[i] == null || !activeAObjects[i].activeInHierarchy)
             {
                 activeAObjects.RemoveAt(i);
             }
@@ -52,43 +46,46 @@ public class WorkerGenManager : MonoBehaviour
 
         while (activeAObjects.Count < spawnCount)
         {
-            SpawnAFromSide();
+            GameObject newWorker = SpawnAboveBridge();
+            if (newWorker != null)
+                activeAObjects.Add(newWorker);
+            else
+                break; // 스폰 위치 없음
         }
     }
 
-    bool IsInCameraView(Vector3 position)
+    GameObject SpawnAboveBridge()
     {
-        Vector3 viewportPos = mainCamera.WorldToViewportPoint(position);
-        return viewportPos.x >= 0 && viewportPos.x <= 1 &&
-               viewportPos.y >= 0 && viewportPos.y <= 1 &&
-               viewportPos.z >= 0;
-    }
+        GameObject[] bridges = GameObject.FindGameObjectsWithTag("Bridge");
+        List<GameObject> candidateBridges = new List<GameObject>();
 
-    void SpawnAFromSide()
-    {
-        float camWidth = mainCamera.orthographicSize * 2f * mainCamera.aspect;
-        float camHeight = mainCamera.orthographicSize * 2f;
+        Vector3 camPos = mainCamera.transform.position;
 
-        float camLeft = mainCamera.transform.position.x - camWidth / 2f;
-        float camRight = mainCamera.transform.position.x + camWidth / 2f;
-        float camY = mainCamera.transform.position.y;
-
-        float spawnY = camY + Random.Range(-camHeight / 4f, camHeight / 4f);
-
-        bool fromLeft = Random.value < 0.5f;
-        float spawnX = fromLeft ? camLeft - 2f : camRight + 2f;
-        float targetX = fromLeft ? camRight + 2f : camLeft - 2f;
-
-        Vector3 spawnPos = new Vector3(spawnX, spawnY + 0.1f, 0f);
-        Vector3 targetPos = new Vector3(targetX, spawnY, 0f);
-
-        GameObject a = Instantiate(prefabA, spawnPos, Quaternion.identity);
-        activeAObjects.Add(a);
-
-        WorkerMover mover = a.GetComponent<WorkerMover>();
-        if (mover != null)
+        foreach (var bridge in bridges)
         {
-            mover.MoveTo(targetPos);
+            float dx = Mathf.Abs(bridge.transform.position.x - camPos.x);
+            if (dx >= minSpawnDistanceFromCamera && dx <= maxSpawnDistanceFromCamera)
+            {
+                candidateBridges.Add(bridge);
+            }
         }
+
+        if (candidateBridges.Count == 0)
+            return null;
+
+        GameObject selectedBridge = candidateBridges[Random.Range(0, candidateBridges.Count)];
+
+        SpriteRenderer bridgeSprite = selectedBridge.GetComponent<SpriteRenderer>();
+        float topY = bridgeSprite != null ? bridgeSprite.bounds.max.y : selectedBridge.transform.position.y;
+        float spawnOffsetY = 0.5f;
+
+        Vector3 spawnPos = new Vector3(
+            selectedBridge.transform.position.x,
+            topY + spawnOffsetY,
+            selectedBridge.transform.position.z
+        );
+
+        GameObject worker = WorkerPoolManager.Instance.GetWorker(spawnPos);
+        return worker;
     }
 }

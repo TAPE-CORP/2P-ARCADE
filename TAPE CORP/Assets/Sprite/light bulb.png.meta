@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 8ec6b7611bbdbe24eb48c97eebf1590e
+guid: ae7628483ab48424c947c981c70e3646
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -46,10 +46,10 @@ TextureImporter:
   spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
-  alignment: 0
-  spritePivot: {x: 0.5, y: 0.5}
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0.2329888}
   spritePixelsToUnits: 100
-  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteBorder: {x: 0, y: 0, z: 0, w: 77}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1
@@ -110,22 +110,43 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: bridge_0
+      name: light bulb_0
       rect:
         serializedVersion: 2
         x: 0
-        y: 599
-        width: 1920
-        height: 168
+        y: 72
+        width: 96
+        height: 72
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: fa0d5bb6de3f2844ea2c7f5db60285df
-      internalID: -237724205
+      spriteID: c08767e4f89947f43890c2672585287c
+      internalID: 433965878
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: light bulb_1
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 96
+        height: 72
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0c18d42a544a8d64bbd83eb3360eb132
+      internalID: -2095852335
       vertices: []
       indices: 
       edges: []
@@ -134,14 +155,15 @@ TextureImporter:
     physicsShape: []
     bones: []
     spriteID: 5e97eb03825dee720800000000000000
-    internalID: 0
+    internalID: 1537655665
     vertices: []
     indices: 
     edges: []
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      bridge_0: -237724205
+      light bulb_0: 433965878
+      light bulb_1: -2095852335
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
