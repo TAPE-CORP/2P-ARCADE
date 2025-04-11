@@ -8,6 +8,7 @@ TagManager:
   - Box
   - Bridge
   - Map
+  - Holder
   layers:
   - Default
   - TransparentFX
