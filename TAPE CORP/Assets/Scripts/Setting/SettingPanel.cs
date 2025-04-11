@@ -3,7 +3,6 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using System.Collections;
 
-
 public class SettingsPanel : MonoBehaviour
 {
     [Header("UI 요소")]
@@ -14,7 +13,7 @@ public class SettingsPanel : MonoBehaviour
     public Text settingsTitleText;
 
     [Header("페이드 배경")]
-    public Image fadeOverlay; // 검정 반투명 오버레이 (알파 0~1 조절용)
+    public Image fadeOverlay;
 
     [Header("페이드 설정")]
     public float fadeDuration = 0.5f;
@@ -24,15 +23,21 @@ public class SettingsPanel : MonoBehaviour
 
     private void Start()
     {
+        // 슬라이더 초기값은 저장된 값으로 설정
+        float savedBGM = PlayerPrefs.GetFloat("BGM_VOLUME", 1f);
+        float savedSE = PlayerPrefs.GetFloat("SE_VOLUME", 1f);
+
         if (bgmSlider != null)
         {
-            bgmSlider.value = BGMManager.Instance != null ? BGMManager.Instance.bgmVolume : 1f;
+            bgmSlider.onValueChanged.RemoveAllListeners();
+            bgmSlider.value = savedBGM;
             bgmSlider.onValueChanged.AddListener(OnBGMVolumeChanged);
         }
 
         if (seSlider != null)
         {
-            seSlider.value = BGMManager.Instance != null ? BGMManager.Instance.seVolume : 1f;
+            seSlider.onValueChanged.RemoveAllListeners();
+            seSlider.value = savedSE;
             seSlider.onValueChanged.AddListener(OnSEVolumeChanged);
         }
 
@@ -42,6 +47,7 @@ public class SettingsPanel : MonoBehaviour
         }
 
         settingsPanel.SetActive(false);
+
         if (fadeOverlay != null)
         {
             Color c = fadeOverlay.color;
@@ -61,6 +67,8 @@ public class SettingsPanel : MonoBehaviour
         }
     }
 
+
+
     private void ToggleSettings()
     {
         isOpen = !isOpen;
@@ -70,7 +78,13 @@ public class SettingsPanel : MonoBehaviour
         {
             settingsPanel.SetActive(true);
             StartCoroutine(FadeIn());
-            StartCoroutine(BGMManager.Instance.FadeBGMVolume(BGMManager.Instance.bgmVolume, 0.1f, volumeFadeDuration));
+
+            if (BGMManager.Instance != null)
+            {
+                float original = BGMManager.Instance.bgmVolume;
+                StartCoroutine(BGMManager.Instance.FadeBGMVolume(original, 0.1f, volumeFadeDuration));
+            }
+
             Time.timeScale = 0f;
         }
         else
@@ -80,7 +94,12 @@ public class SettingsPanel : MonoBehaviour
                 settingsPanel.SetActive(false);
                 Time.timeScale = 1f;
             }));
-            StartCoroutine(BGMManager.Instance.FadeBGMVolume(0.1f, BGMManager.Instance.bgmVolume, volumeFadeDuration));
+
+            if (BGMManager.Instance != null)
+            {
+                float sliderVolume = bgmSlider != null ? bgmSlider.value : 1f;
+                StartCoroutine(BGMManager.Instance.FadeBGMVolume(0.1f, sliderVolume, volumeFadeDuration));
+            }
         }
     }
 
@@ -91,6 +110,7 @@ public class SettingsPanel : MonoBehaviour
         fadeOverlay.gameObject.SetActive(true);
         Color color = fadeOverlay.color;
         float t = 0f;
+
         while (t < fadeDuration)
         {
             t += Time.unscaledDeltaTime;
@@ -99,6 +119,7 @@ public class SettingsPanel : MonoBehaviour
             fadeOverlay.color = color;
             yield return null;
         }
+
         color.a = 0.6f;
         fadeOverlay.color = color;
     }
@@ -109,6 +130,7 @@ public class SettingsPanel : MonoBehaviour
 
         Color color = fadeOverlay.color;
         float t = 0f;
+
         while (t < fadeDuration)
         {
             t += Time.unscaledDeltaTime;
@@ -117,6 +139,7 @@ public class SettingsPanel : MonoBehaviour
             fadeOverlay.color = color;
             yield return null;
         }
+
         color.a = 0f;
         fadeOverlay.color = color;
         fadeOverlay.gameObject.SetActive(false);
@@ -127,8 +150,7 @@ public class SettingsPanel : MonoBehaviour
     {
         if (BGMManager.Instance != null)
         {
-            StopCoroutine("FadeInBGMVolume");
-            StartCoroutine(FadeInBGMVolume(value));
+            BGMManager.Instance.SetBGMVolume(value);
 
             foreach (AudioSource source in BGMManager.Instance.bgmSources)
             {
@@ -136,38 +158,6 @@ public class SettingsPanel : MonoBehaviour
                     source.Play();
             }
         }
-    }
-
-    private IEnumerator FadeInBGMVolume(float targetVolume)
-    {
-        float elapsed = 0f;
-        float startVolume = 0.1f;
-
-        foreach (AudioSource source in BGMManager.Instance.bgmSources)
-        {
-            if (source != null)
-                source.volume = startVolume;
-        }
-
-        while (elapsed < volumeFadeDuration)
-        {
-            elapsed += Time.unscaledDeltaTime;
-            float v = Mathf.Lerp(startVolume, targetVolume, elapsed / volumeFadeDuration);
-            foreach (AudioSource source in BGMManager.Instance.bgmSources)
-            {
-                if (source != null)
-                    source.volume = v;
-            }
-            yield return null;
-        }
-
-        foreach (AudioSource source in BGMManager.Instance.bgmSources)
-        {
-            if (source != null)
-                source.volume = targetVolume;
-        }
-
-        BGMManager.Instance.bgmVolume = targetVolume;
     }
 
     public void OnSEVolumeChanged(float value)
