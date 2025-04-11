@@ -18,6 +18,7 @@ public class DataHandler : MonoBehaviour
     public Data scoreInfo = new Data();
     public TReturn ReturnScore<TReturn>(Data info)
     {
+        return default(TReturn);
         //여기서 구현 로직 짤 것
     }
 }
