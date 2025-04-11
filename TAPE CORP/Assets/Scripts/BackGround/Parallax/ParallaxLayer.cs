@@ -11,13 +11,11 @@ public class ParallaxLayer : MonoBehaviour
     public float spacingX = 1f;
     public float spacingY = 1f;
 
-    private int tileCountX;
-    private int tileCountY;
     private float tileWidth;
     private float tileHeight;
 
     private List<GameObject> tiles = new List<GameObject>();
-    private Vector2Int currentTileOffset = Vector2Int.zero;
+    private List<Vector2> tileBasePositions = new List<Vector2>();
 
     void Start()
     {
@@ -38,20 +36,21 @@ public class ParallaxLayer : MonoBehaviour
         tileWidth = sr.bounds.size.x * spacingX;
         tileHeight = sr.bounds.size.y * spacingY;
 
-        float camWidth = GetCameraWidth();
-        float camHeight = GetCameraHeight();
+        int countX = Mathf.FloorToInt(200f / tileWidth);
+        int countY = Mathf.FloorToInt(100f / tileHeight);
 
-        // 패럴럭스 밀림 여유 공간 고려
-        float parallaxShiftX = Mathf.Abs(parallaxFactor - 1f) * camWidth;
-        float parallaxShiftY = Mathf.Abs(parallaxFactor - 1f) * camHeight;
+        Vector2 center = new Vector2(100f, 50f);
 
-        tileCountX = Mathf.CeilToInt((camWidth + parallaxShiftX) / tileWidth) + 13;
-        tileCountY = Mathf.CeilToInt((camHeight + parallaxShiftY) / tileHeight) + 8;
-
-        for (int y = 0; y < tileCountY; y++)
+        for (int y = 0; y <= countY; y++)
         {
-            for (int x = 0; x < tileCountX; x++)
+            for (int x = 0; x <= countX; x++)
             {
+                float baseX = (x - countX / 2f) * tileWidth + center.x;
+                float baseY = (y - countY / 2f) * tileHeight + center.y;
+
+                Vector2 basePos = new Vector2(baseX, baseY);
+                tileBasePositions.Add(basePos);
+
                 GameObject tile = Instantiate(tilePrefab, Vector3.zero, Quaternion.identity, transform);
                 tiles.Add(tile);
             }
@@ -62,44 +61,27 @@ public class ParallaxLayer : MonoBehaviour
     {
         Vector3 camPos = mainCamera.transform.position;
 
-        int index = 0;
-        for (int y = 0; y < tileCountY; y++)
+        for (int i = 0; i < tiles.Count; i++)
         {
-            for (int x = 0; x < tileCountX; x++)
+            Vector2 basePos = tileBasePositions[i];
+
+            float offsetX = basePos.x + camPos.x * (parallaxFactor - 1f);
+            float offsetY = basePos.y + camPos.y * (parallaxFactor - 1f);
+
+            GameObject tile = tiles[i];
+            tile.transform.position = new Vector3(offsetX, offsetY, zOffset);
+
+            SpriteRenderer sr = tile.GetComponent<SpriteRenderer>();
+            if (sr != null)
             {
-                if (index >= tiles.Count) break;
-
-                int gridX = x - tileCountX / 2;
-                int gridY = y - tileCountY / 2;
-
-                float baseX = (Mathf.Floor(camPos.x / tileWidth) + gridX) * tileWidth;
-                float baseY = (Mathf.Floor(camPos.y / tileHeight) + gridY) * tileHeight;
-
-                float offsetX = baseX + (camPos.x * (parallaxFactor - 1f));
-                float offsetY = baseY + (camPos.y * (parallaxFactor - 1f));
-
-                GameObject tile = tiles[index];
-                tile.transform.position = new Vector3(offsetX, offsetY, zOffset);
-
-                // 공기 원근 효과 적용
-                SpriteRenderer sr = tile.GetComponent<SpriteRenderer>();
-                if (sr != null)
-                {
-                    float distanceFactor = 1f - Mathf.Clamp01(parallaxFactor); // 0.0 = 가장 가까움, 1.0 = 가장 멀리
-                    Color baseColor = Color.white;
-                    baseColor.a = Mathf.Lerp(1f, 0.5f, distanceFactor); // 멀수록 투명
-                    baseColor.r = Mathf.Lerp(1f, 0.8f, distanceFactor); // 멀수록 붉은기 줄어듦
-                    baseColor.g = Mathf.Lerp(1f, 0.9f, distanceFactor); // 채도 감소
-                    baseColor.b = Mathf.Lerp(1f, 1f, distanceFactor);   // 블루는 유지
-
-                    sr.color = baseColor;
-                }
-
-                index++;
+                float distanceFactor = 1f - Mathf.Clamp01(parallaxFactor);
+                Color baseColor = Color.white;
+                baseColor.a = Mathf.Lerp(1f, 0.5f, distanceFactor);
+                baseColor.r = Mathf.Lerp(1f, 0.8f, distanceFactor);
+                baseColor.g = Mathf.Lerp(1f, 0.9f, distanceFactor);
+                baseColor.b = Mathf.Lerp(1f, 1f, distanceFactor);
+                sr.color = baseColor;
             }
         }
     }
-
-    float GetCameraWidth() => mainCamera.orthographicSize * 2f * mainCamera.aspect;
-    float GetCameraHeight() => mainCamera.orthographicSize * 2f;
 }
