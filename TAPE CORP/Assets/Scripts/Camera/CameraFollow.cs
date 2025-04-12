@@ -38,9 +38,15 @@ public class MultiTargetCamera : MonoBehaviour
         Vector3 desiredPosition = centerPoint;
         desiredPosition.z = transform.position.z;
 
+        // 제한된 위치 보정
+        float camHeight = cam.orthographicSize;
+        float camWidth = camHeight * cam.aspect;
+
+        desiredPosition.x = Mathf.Clamp(desiredPosition.x, camWidth, 200f - camWidth);
+        desiredPosition.y = Mathf.Clamp(desiredPosition.y, camHeight, 100f - camHeight);
+
         transform.position = Vector3.SmoothDamp(transform.position, desiredPosition, ref velocity, smoothTime);
     }
-
     void Zoom()
     {
         float requiredSize = GetRequiredSize();
