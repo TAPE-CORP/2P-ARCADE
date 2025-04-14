@@ -25,7 +25,6 @@ public class DronePickupManager : MonoBehaviour
 
         foreach (var player in players)
         {
-            // y <= 0 이하면 드론 출동
             if (player.transform.position.y <= 0f && !rescuedPlayers.Contains(player.transform))
             {
                 GameObject availableDrone = GetAvailableDrone();
@@ -33,7 +32,7 @@ public class DronePickupManager : MonoBehaviour
                 {
                     availableDrone.SetActive(true);
                     DronePickupController dpc = availableDrone.GetComponent<DronePickupController>();
-                    dpc.Initialize(player.transform);
+                    dpc.Initialize(player.transform, this);  // 매니저 넘기기
                     rescuedPlayers.Add(player.transform);
                 }
             }
@@ -45,8 +44,19 @@ public class DronePickupManager : MonoBehaviour
         foreach (var drone in dronePool)
         {
             if (!drone.activeInHierarchy)
+            {
                 return drone;
+            }
         }
         return null;
+    }
+
+    // 다시 구조 가능하게 만드는 메서드
+    public void UnmarkRescuedPlayer(Transform playerTransform)
+    {
+        if (rescuedPlayers.Contains(playerTransform))
+        {
+            rescuedPlayers.Remove(playerTransform);
+        }
     }
 }

@@ -12,22 +12,26 @@ public class DronePickupController : MonoBehaviour
 
     public float pickupDelay = 0.5f;
 
-    public LayerMask groundLayer;            // 충돌 감지용 레이어
-    public string releaseKey = "Jump";       // 입력 키 (InputManager 기준)
+    public LayerMask groundLayer;
+    public string releaseKey = "Jump";
+
     [SerializeField] private float liftSpeed = 1f;
+    [SerializeField] private float fastLiftSpeed = 3f;
+    [SerializeField] private float slowLiftSpeed = 1f;
+
     private float t = 0f;
     private Camera mainCam;
     private LineRenderer line;
     private Transform player;
-    [SerializeField] private float fastLiftSpeed = 3f;
-    [SerializeField] private float slowLiftSpeed = 1f;
+    private DronePickupManager manager;
     private float currentLiftSpeed;
 
-    public void Initialize(Transform targetPlayer)
+    public void Initialize(Transform targetPlayer, DronePickupManager pickupManager)
     {
         mainCam = Camera.main;
         line = GetComponent<LineRenderer>();
         player = targetPlayer;
+        manager = pickupManager;
 
         t = 0f;
         transform.position = GetDynamicStandbyPosition();
@@ -37,11 +41,13 @@ public class DronePickupController : MonoBehaviour
 
         StartCoroutine(LaunchWithCurve());
     }
+
     bool IsInsideCameraView()
     {
         Vector3 viewportPos = mainCam.WorldToViewportPoint(transform.position);
         return viewportPos.x >= 0f && viewportPos.x <= 1f && viewportPos.y >= 0f && viewportPos.y <= 1f;
     }
+
     Vector3 GetDynamicStandbyPosition()
     {
         float camHeight = 2f * mainCam.orthographicSize;
@@ -91,7 +97,7 @@ public class DronePickupController : MonoBehaviour
         {
             prb.velocity = Vector2.zero;
             prb.gravityScale = 0f;
-            prb.isKinematic = true;
+            prb.simulated = false;
         }
 
         line.enabled = true;
@@ -99,7 +105,6 @@ public class DronePickupController : MonoBehaviour
         Vector3 originalPlayerPos = player.position;
         float timer = 0f;
 
-        // 1. 플레이어 위치를 드론 아래로 당김
         while (timer < pickupDelay)
         {
             player.position = Vector3.Lerp(originalPlayerPos, pickupPoint, timer / pickupDelay);
@@ -110,7 +115,6 @@ public class DronePickupController : MonoBehaviour
 
         player.SetParent(transform);
 
-        // 2. 위로 이동하며 해제 입력 대기
         while (true)
         {
             currentLiftSpeed = IsInsideCameraView() ? slowLiftSpeed : fastLiftSpeed;
@@ -126,17 +130,25 @@ public class DronePickupController : MonoBehaviour
 
             yield return null;
         }
-        // 3. 플레이어 분리
+
         player.SetParent(null);
+
         if (prb)
         {
             prb.gravityScale = 1f;
-            prb.isKinematic = false;
+            prb.simulated = true;
         }
 
         line.enabled = false;
 
         yield return new WaitForSeconds(0.5f);
+
+        // 구조 끝났으니 매니저에 알림
+        if (manager != null)
+        {
+            manager.UnmarkRescuedPlayer(player);
+        }
+
         gameObject.SetActive(false);
     }
 

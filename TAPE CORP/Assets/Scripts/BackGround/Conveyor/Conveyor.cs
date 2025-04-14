@@ -9,11 +9,10 @@ public class Conveyor : MonoBehaviour
     {
         Rigidbody2D rb = collision.GetComponent<Rigidbody2D>();
 
-        if (rb != null && rb.gameObject.CompareTag("Holder"))
+        if (rb != null && (rb.gameObject.CompareTag("Holder") || rb.gameObject.CompareTag("Box")))
         {
             // 중력 제거
             rb.gravityScale = 0;
-
             // 로컬 기준 오른쪽 방향으로 velocity 설정
             Vector2 localRight = transform.right.normalized;
             rb.velocity = localRight * speed;
@@ -30,7 +29,7 @@ public class Conveyor : MonoBehaviour
     {
         Rigidbody2D rb = collision.GetComponent<Rigidbody2D>();
 
-        if (rb != null && rb.gameObject.CompareTag("Holder"))
+        if (rb != null && (rb.gameObject.CompareTag("Holder") || rb.gameObject.CompareTag("Box")))
         {
             // 중력 다시 적용
             rb.gravityScale = 1;

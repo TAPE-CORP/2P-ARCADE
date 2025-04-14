@@ -127,17 +127,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   controlOffset: {x: 2, y: 4, z: 0}
-  curveSmooth: 2
+  curveSmooth: 5
   standbyMargin: 1
   standbyOffsetRangeY: 2
   pickupDelay: 0
   groundLayer:
     serializedVersion: 2
-    m_Bits: 8
+    m_Bits: 32328
   releaseKey: Jump
-  liftSpeed: 10
-  fastLiftSpeed: 15
-  slowLiftSpeed: 2.5
+  liftSpeed: 15
+  fastLiftSpeed: 500
+  slowLiftSpeed: 3
 --- !u!120 &7294850022216207401
 LineRenderer:
   serializedVersion: 2
