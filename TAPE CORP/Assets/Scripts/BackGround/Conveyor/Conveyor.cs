@@ -18,7 +18,7 @@ public class Conveyor : MonoBehaviour
             Vector2 localRight = transform.right.normalized;
             rb.velocity = localRight * speed;
         }
-        else if (rb != null)
+        else if (rb != null && collision.gameObject.layer != LayerMask.NameToLayer("Map"))
         {
             // 이 부분은 절대 건드리지 않음
             Vector2 velocity = (isRight ? Vector2.right * Time.deltaTime : Vector2.left * Time.deltaTime);
