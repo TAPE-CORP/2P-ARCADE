@@ -6,57 +6,58 @@ public class DronePickupController : MonoBehaviour
 {
     public Vector3 controlOffset = new Vector3(2f, 4f, 0f);
     public float curveSmooth = 2f;
-
-    public float standbyMargin = 1f;
-    public float standbyOffsetRangeY = 2f;
-
     public float pickupDelay = 0.5f;
 
+    public float horizontalMoveSpeed = 2f;
+    public float fastLiftSpeed = 3f;
+    public float slowLiftSpeed = 1f;
+
     public LayerMask groundLayer;
-    public string releaseKey = "Jump";
 
-    [SerializeField] private float liftSpeed = 1f;
-    [SerializeField] private float fastLiftSpeed = 3f;
-    [SerializeField] private float slowLiftSpeed = 1f;
-
-    private float t = 0f;
     private Camera mainCam;
     private LineRenderer line;
     private Transform player;
+    private Rigidbody2D prb;
+    private Collider2D pcollider;
     private DronePickupManager manager;
+    private bool forceReleaseRequested = false;
+
+    private float t = 0f;
     private float currentLiftSpeed;
 
-    public void Initialize(Transform targetPlayer, DronePickupManager pickupManager)
+    public void Initialize(Transform targetPlayer, DronePickupManager droneManager)
     {
-        mainCam = Camera.main;
-        line = GetComponent<LineRenderer>();
-        player = targetPlayer;
-        manager = pickupManager;
+        StopAllCoroutines(); // 혹시 이전 코루틴이 살아있을 경우 대비
+        gameObject.SetActive(true); // 확실히 켜기
 
+        // 내부 상태 초기화
         t = 0f;
-        transform.position = GetDynamicStandbyPosition();
+        forceReleaseRequested = false;
+        line = GetComponent<LineRenderer>();
+        mainCam = Camera.main;
 
+        player = targetPlayer;
+        manager = droneManager;
+        prb = player.GetComponent<Rigidbody2D>();
+        pcollider = player.GetComponent<Collider2D>();
+
+        transform.position = GetStandbyPosition();
+
+        // LineRenderer 초기화
         line.positionCount = 2;
         line.enabled = false;
 
         StartCoroutine(LaunchWithCurve());
     }
 
-    bool IsInsideCameraView()
-    {
-        Vector3 viewportPos = mainCam.WorldToViewportPoint(transform.position);
-        return viewportPos.x >= 0f && viewportPos.x <= 1f && viewportPos.y >= 0f && viewportPos.y <= 1f;
-    }
-
-    Vector3 GetDynamicStandbyPosition()
+    Vector3 GetStandbyPosition()
     {
         float camHeight = 2f * mainCam.orthographicSize;
         float camWidth = camHeight * mainCam.aspect;
         Vector3 camCenter = mainCam.transform.position;
 
-        bool spawnLeft = Random.value < 0.5f;
-        float x = camCenter.x + (spawnLeft ? -camWidth / 2f - standbyMargin : camWidth / 2f + standbyMargin);
-        float y = camCenter.y + Random.Range(-standbyOffsetRangeY, standbyOffsetRangeY);
+        float x = camCenter.x + (Random.value < 0.5f ? -camWidth : camWidth);
+        float y = camCenter.y;
 
         return new Vector3(x, y, 0f);
     }
@@ -72,26 +73,17 @@ public class DronePickupController : MonoBehaviour
             Vector3 b = Vector3.Lerp(control, player.position, t);
             transform.position = Vector3.Lerp(a, b, t);
 
-            Vector3 dir = b - a;
-            float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-            transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(0, 0, angle), Time.deltaTime * 10f);
-
             t += Time.deltaTime / curveSmooth;
             yield return null;
         }
 
         transform.position = player.position + Vector3.up * 1.5f;
-        transform.rotation = Quaternion.identity;
-
         StartCoroutine(PickupPlayer());
     }
 
     IEnumerator PickupPlayer()
     {
         Debug.Log("픽업 시작");
-
-        Rigidbody2D prb = player.GetComponent<Rigidbody2D>();
-        Collider2D pcollider = player.GetComponent<Collider2D>();
 
         if (prb)
         {
@@ -119,20 +111,25 @@ public class DronePickupController : MonoBehaviour
         {
             currentLiftSpeed = IsInsideCameraView() ? slowLiftSpeed : fastLiftSpeed;
 
-            transform.position += Vector3.up * currentLiftSpeed * Time.deltaTime;
+            float moveInput = GetHorizontalInputForPlayer(player.gameObject.layer);
+            Vector3 move = new Vector3(moveInput * horizontalMoveSpeed * Time.deltaTime, currentLiftSpeed * Time.deltaTime, 0f);
+
+            transform.position += move;
             UpdateLine(player.position);
 
-            if (Input.GetButtonDown(releaseKey) && !IsTouchingGround(pcollider))
+            if (forceReleaseRequested || (Input.GetKeyDown(KeyCode.LeftShift) && player.gameObject.layer == LayerMask.NameToLayer("Grab2P")) ||
+                (Input.GetKeyDown(KeyCode.RightShift) && player.gameObject.layer == LayerMask.NameToLayer("Grab1P")))
             {
-                Debug.Log("해제됨");
-                break;
+                if (!IsTouchingGround(pcollider))
+                {
+                    break;
+                }
             }
 
             yield return null;
         }
 
         player.SetParent(null);
-
         if (prb)
         {
             prb.gravityScale = 1f;
@@ -140,21 +137,35 @@ public class DronePickupController : MonoBehaviour
         }
 
         line.enabled = false;
+        manager.UnmarkPickup(player);
 
         yield return new WaitForSeconds(0.5f);
-
-        // 구조 끝났으니 매니저에 알림
-        if (manager != null)
-        {
-            manager.UnmarkRescuedPlayer(player);
-        }
-
         gameObject.SetActive(false);
+    }
+
+    public void ForceRelease()
+    {
+        forceReleaseRequested = true;
+    }
+
+    bool IsInsideCameraView()
+    {
+        Vector3 viewportPos = mainCam.WorldToViewportPoint(transform.position);
+        return viewportPos.x >= 0f && viewportPos.x <= 1f && viewportPos.y >= 0f && viewportPos.y <= 1f;
     }
 
     bool IsTouchingGround(Collider2D col)
     {
         return col != null && col.IsTouchingLayers(groundLayer);
+    }
+
+    float GetHorizontalInputForPlayer(int layer)
+    {
+        if (layer == LayerMask.NameToLayer("Grab2P"))
+            return Input.GetKey(KeyCode.D) ? 1f : Input.GetKey(KeyCode.A) ? -1f : 0f;
+        else if (layer == LayerMask.NameToLayer("Grab1P"))
+            return Input.GetKey(KeyCode.RightArrow) ? 1f : Input.GetKey(KeyCode.LeftArrow) ? -1f : 0f;
+        return 0f;
     }
 
     void UpdateLine(Vector3 playerPos)

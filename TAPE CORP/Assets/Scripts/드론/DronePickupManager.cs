@@ -7,7 +7,7 @@ public class DronePickupManager : MonoBehaviour
     public int poolSize = 2;
 
     private List<GameObject> dronePool = new List<GameObject>();
-    private HashSet<Transform> rescuedPlayers = new HashSet<Transform>();
+    private Dictionary<Transform, GameObject> activePickups = new Dictionary<Transform, GameObject>();
 
     void Start()
     {
@@ -21,20 +21,45 @@ public class DronePickupManager : MonoBehaviour
 
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.LeftShift))
+        {
+            TryTogglePickup("Grab2P"); // Player2
+        }
+        else if (Input.GetKeyDown(KeyCode.RightShift))
+        {
+            TryTogglePickup("Grab1P"); // Player1
+        }
+    }
+
+    void TryTogglePickup(string layerName)
+    {
+        int layer = LayerMask.NameToLayer(layerName);
         GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
 
         foreach (var player in players)
         {
-            if (player.transform.position.y <= 0f && !rescuedPlayers.Contains(player.transform))
+            if (player.layer == layer)
             {
-                GameObject availableDrone = GetAvailableDrone();
-                if (availableDrone != null)
+                if (activePickups.ContainsKey(player.transform))
                 {
-                    availableDrone.SetActive(true);
-                    DronePickupController dpc = availableDrone.GetComponent<DronePickupController>();
-                    dpc.Initialize(player.transform, this);  // 매니저 넘기기
-                    rescuedPlayers.Add(player.transform);
+                    // 해제
+                    DronePickupController dpc = activePickups[player.transform].GetComponent<DronePickupController>();
+                    dpc.ForceRelease();
+                    activePickups.Remove(player.transform);
                 }
+                else
+                {
+                    GameObject drone = GetAvailableDrone();
+                    if (drone != null)
+                    {
+                        drone.SetActive(true);
+                        DronePickupController dpc = drone.GetComponent<DronePickupController>();
+                        dpc.Initialize(player.transform, this);
+                        activePickups[player.transform] = drone;
+                    }
+                }
+
+                break; // 한 명만 처리
             }
         }
     }
@@ -44,19 +69,16 @@ public class DronePickupManager : MonoBehaviour
         foreach (var drone in dronePool)
         {
             if (!drone.activeInHierarchy)
-            {
                 return drone;
-            }
         }
         return null;
     }
 
-    // 다시 구조 가능하게 만드는 메서드
-    public void UnmarkRescuedPlayer(Transform playerTransform)
+    public void UnmarkPickup(Transform player)
     {
-        if (rescuedPlayers.Contains(playerTransform))
+        if (activePickups.ContainsKey(player))
         {
-            rescuedPlayers.Remove(playerTransform);
+            activePickups.Remove(player);
         }
     }
 }
