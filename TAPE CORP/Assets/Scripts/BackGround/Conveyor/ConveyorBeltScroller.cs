@@ -5,25 +5,25 @@ public class ConveyorBeltScroller : MonoBehaviour
 {
     public Material conveyorMaterial;
     public float scrollSpeed = 0.5f;
-    public Vector2 baseTiling = new Vector2(1f, 1f); // 단위 스케일당 반복 횟수
-    public float baseTilingX = 5f; // X축 단위 스케일당 반복 횟수
 
-    private Renderer rend;
+    private Conveyor conveyor;
+    private float baseZRotation;
 
     void Start()
     {
-        rend = GetComponent<Renderer>();
-
-        // 초기 스케일 기준 반복 횟수 설정
-        Vector3 scale = transform.lossyScale;
-        Vector2 tiling = new Vector2(scale.x * baseTiling.x/5, scale.y * baseTiling.y);
-        conveyorMaterial.mainTextureScale = tiling;
+        conveyor = GetComponent<Conveyor>();
+        baseZRotation = transform.eulerAngles.z; // 시작 각도 저장
     }
 
     void Update()
     {
-        // 텍스처 스크롤만 계속
-        float offset = Time.time * scrollSpeed;
+        // 기존 각도 + 방향에 따라 0 또는 180도 추가
+        float targetZ = conveyor.isRight ? baseZRotation : baseZRotation + 180f;
+        transform.rotation = Quaternion.Euler(0f, 0f, targetZ);
+
+        // 텍스처 스크롤
+        float direction = 1f;
+        float offset = Time.time * scrollSpeed * direction;
         conveyorMaterial.mainTextureOffset = new Vector2(offset, 0);
     }
 }

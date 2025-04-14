@@ -205,5 +205,3 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   conveyorMaterial: {fileID: 2100000, guid: b9737f488f1eb7e44b6f0f123a162034, type: 2}
   scrollSpeed: -0.5
-  baseTiling: {x: 1, y: 1}
-  baseTilingX: 5

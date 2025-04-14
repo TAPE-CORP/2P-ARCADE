@@ -5,23 +5,26 @@ public class Conveyor : MonoBehaviour
     public float speed = 1.5f; // 컨베이어 벨트의 속도
     public bool isRight = true;
 
+    private Vector2 moveDirection;
+
+    void Update()
+    {
+        // 방향 설정 (스크롤 방향과 일치)
+        moveDirection = isRight ? Vector2.right : Vector2.left;
+    }
+
     private void OnTriggerStay2D(Collider2D collision)
     {
         Rigidbody2D rb = collision.GetComponent<Rigidbody2D>();
 
         if (rb != null && (rb.gameObject.CompareTag("Holder") || rb.gameObject.CompareTag("Box")))
         {
-            // 중력 제거
             rb.gravityScale = 0;
-            // 로컬 기준 오른쪽 방향으로 velocity 설정
-            Vector2 localRight = transform.right.normalized;
-            rb.velocity = localRight * speed;
+            rb.velocity = moveDirection * speed;
         }
         else if (rb != null && collision.gameObject.layer != LayerMask.NameToLayer("Map"))
         {
-            // 이 부분은 절대 건드리지 않음
-            Vector2 velocity = (isRight ? Vector2.right * Time.deltaTime : Vector2.left * Time.deltaTime);
-            collision.transform.Translate(velocity * speed);
+            collision.transform.Translate(moveDirection * speed * Time.deltaTime);
         }
     }
 
@@ -31,8 +34,13 @@ public class Conveyor : MonoBehaviour
 
         if (rb != null && (rb.gameObject.CompareTag("Holder") || rb.gameObject.CompareTag("Box")))
         {
-            // 중력 다시 적용
             rb.gravityScale = 1;
         }
+    }
+
+    public void SetDirection()
+    {
+        isRight = !isRight;
+        moveDirection = isRight ? Vector2.right : Vector2.left;
     }
 }
