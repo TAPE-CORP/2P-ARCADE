@@ -60,7 +60,9 @@ public class FloatingIslandsGenerator : MonoBehaviour
         }
         return worldPosition;
     }
-
+    /// <summary>
+    /// µð¹ö±ë¿ë ¹Ù´Ú »ý¼º
+    /// </summary>
     private void GenerateGround()
     {
         for (int x = 0; x < mapSize.x; x++)

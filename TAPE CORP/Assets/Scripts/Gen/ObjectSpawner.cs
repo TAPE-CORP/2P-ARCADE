@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class ObjectSpawner : MonoBehaviour
 {
-    public GameObject objectPrefab;
+    public GameObject[] objectPrefabs; // 배열로 변경
     public Transform SpawnTransform;
     public float spawnInterval = 2f;
 
@@ -15,11 +15,21 @@ public class ObjectSpawner : MonoBehaviour
     {
         if (SpawnTransform == null)
         {
-            Debug.LogWarning("dSpawnTransform is not assigned!");
+            Debug.LogWarning("SpawnTransform is not assigned!");
             return;
         }
 
-        GameObject dInstance = Instantiate(objectPrefab, SpawnTransform.position, Quaternion.identity);
+        if (objectPrefabs == null || objectPrefabs.Length == 0)
+        {
+            Debug.LogWarning("objectPrefabs array is empty!");
+            return;
+        }
+
+        // 무작위로 하나 선택
+        int randomIndex = Random.Range(0, objectPrefabs.Length);
+        GameObject selectedPrefab = objectPrefabs[randomIndex];
+
+        GameObject dInstance = Instantiate(selectedPrefab, SpawnTransform.position, Quaternion.identity);
         Rigidbody2D dRb = dInstance.GetComponent<Rigidbody2D>();
         if (dRb != null)
         {
