@@ -42,7 +42,7 @@ public class FloatingIslandsGenerator : MonoBehaviour
     private void GenerateWorld()
     {
         Debug.Log("월드 생성 시작...");
-        //GenerateGround();
+        GenerateGround();
         GenerateIslands();
         tilemap.RefreshAllTiles();
         Debug.Log("월드 생성 완료!");
@@ -113,7 +113,15 @@ public class FloatingIslandsGenerator : MonoBehaviour
                         {
                             if (!IsSurrounded(x, y))
                             {
-                                tilemap.SetTile(new Vector3Int(x, y, 0), islandTile);
+                                Vector3Int tilePos = new Vector3Int(x, y, 0);
+                                tilemap.SetTile(tilePos, islandTile);
+
+                                // 바로 위에 groundTile 덮기
+                                Vector3Int abovePos = new Vector3Int(x, y + 1, 0);
+                                if (abovePos.y < mapOffset.y + mapSize.y)
+                                {
+                                    tilemap.SetTile(abovePos, groundTile);
+                                }
                             }
                         }
                     }

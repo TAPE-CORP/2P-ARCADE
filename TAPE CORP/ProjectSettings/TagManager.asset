@@ -52,6 +52,9 @@ TagManager:
   - name: Map
     uniqueID: 2031672915
     locked: 0
+  - name: Player
+    uniqueID: 4215650863
+    locked: 0
   - name: Drone
     uniqueID: 1001239959
     locked: 0
