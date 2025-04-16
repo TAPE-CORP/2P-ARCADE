@@ -27,10 +27,9 @@ public class DronePickupController : MonoBehaviour
 
     public void Initialize(Transform targetPlayer, DronePickupManager droneManager)
     {
-        StopAllCoroutines(); // 혹시 이전 코루틴이 살아있을 경우 대비
-        gameObject.SetActive(true); // 확실히 켜기
+        StopAllCoroutines();
+        gameObject.SetActive(true);
 
-        // 내부 상태 초기화
         t = 0f;
         forceReleaseRequested = false;
         line = GetComponent<LineRenderer>();
@@ -43,7 +42,6 @@ public class DronePickupController : MonoBehaviour
 
         transform.position = GetStandbyPosition();
 
-        // LineRenderer 초기화
         line.positionCount = 2;
         line.enabled = false;
 
@@ -107,9 +105,20 @@ public class DronePickupController : MonoBehaviour
 
         player.SetParent(transform);
 
+        // 처음 상태 저장
+        bool hasEnteredCamera = IsInsideCameraView();
+        currentLiftSpeed = hasEnteredCamera ? slowLiftSpeed : fastLiftSpeed;
+
         while (true)
         {
-            currentLiftSpeed = IsInsideCameraView() ? slowLiftSpeed : fastLiftSpeed;
+            bool isInsideNow = IsInsideCameraView();
+
+            // 밖 → 안일 경우에만 속도 변경
+            if (!hasEnteredCamera && isInsideNow)
+            {
+                hasEnteredCamera = true;
+                currentLiftSpeed = slowLiftSpeed;
+            }
 
             float moveInput = GetHorizontalInputForPlayer(player.gameObject.layer);
             Vector3 move = new Vector3(moveInput * horizontalMoveSpeed * Time.deltaTime, currentLiftSpeed * Time.deltaTime, 0f);

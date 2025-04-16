@@ -330,6 +330,7 @@ GameObject:
   - component: {fileID: 5305031224444283193}
   - component: {fileID: 5241766550468339989}
   - component: {fileID: 7463083919719308322}
+  - component: {fileID: 7281316826634686918}
   m_Layer: 0
   m_Name: spotlight
   m_TagString: Untagged
@@ -374,7 +375,7 @@ MonoBehaviour:
   m_Intensity: 1
   m_LightVolumeIntensity: 0.53
   m_LightVolumeIntensityEnabled: 1
-  m_ApplyToSortingLayers: 00000000
+  m_ApplyToSortingLayers: 0000000053de187997b5ad3b
   m_LightCookieSprite: {fileID: 0}
   m_DeprecatedPointLightCookieSprite: {fileID: 0}
   m_LightOrder: 0
@@ -383,9 +384,9 @@ MonoBehaviour:
   m_NormalMapDistance: 3
   m_NormalMapQuality: 0
   m_UseNormalMap: 0
-  m_ShadowIntensityEnabled: 0
+  m_ShadowIntensityEnabled: 1
   m_ShadowIntensity: 0.75
-  m_ShadowVolumeIntensityEnabled: 0
+  m_ShadowVolumeIntensityEnabled: 1
   m_ShadowVolumeIntensity: 0.75
   m_LocalBounds:
     m_Center: {x: 0, y: -0.00000011920929, z: 0}
@@ -393,7 +394,7 @@ MonoBehaviour:
   m_PointLightInnerAngle: 0
   m_PointLightOuterAngle: 70.58513
   m_PointLightInnerRadius: 0
-  m_PointLightOuterRadius: 3.01
+  m_PointLightOuterRadius: 4.9
   m_ShapeLightParametricSides: 5
   m_ShapeLightParametricAngleOffset: 0
   m_ShapeLightParametricRadius: 1
@@ -466,3 +467,20 @@ CircleCollider2D:
   m_Offset: {x: 0, y: 0.09729743}
   serializedVersion: 2
   m_Radius: 0.59729743
+--- !u!114 &7281316826634686918
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8441865857822487403}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce6af0ff776a33446bbd03d842c444ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  light2D: {fileID: 5305031224444283193}
+  minIntensity: 0.2
+  maxIntensity: 1
+  minFlickerDuration: 0.5
+  maxFlickerDuration: 2
