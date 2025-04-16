@@ -42,8 +42,8 @@ public class MultiTargetCamera : MonoBehaviour
         float camHeight = cam.orthographicSize;
         float camWidth = camHeight * cam.aspect;
 
-        desiredPosition.x = Mathf.Clamp(desiredPosition.x, camWidth, 200f - camWidth);
-        desiredPosition.y = Mathf.Clamp(desiredPosition.y, camHeight, 100f - camHeight);
+        desiredPosition.x = Mathf.Clamp(desiredPosition.x, camWidth, 60f - camWidth);
+        desiredPosition.y = Mathf.Clamp(desiredPosition.y, camHeight, 60f - camHeight);
 
         transform.position = Vector3.SmoothDamp(transform.position, desiredPosition, ref velocity, smoothTime);
     }

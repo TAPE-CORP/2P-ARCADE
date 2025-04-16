@@ -42,7 +42,7 @@ public class FloatingIslandsGenerator : MonoBehaviour
     private void GenerateWorld()
     {
         Debug.Log("월드 생성 시작...");
-        GenerateGround();
+        //GenerateGround();
         GenerateIslands();
         tilemap.RefreshAllTiles();
         Debug.Log("월드 생성 완료!");

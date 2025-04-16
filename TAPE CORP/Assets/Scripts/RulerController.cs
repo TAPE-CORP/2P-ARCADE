@@ -8,9 +8,10 @@ public class RulerController : MonoBehaviour
     public Transform handle;
     public KeyCode grabKey = KeyCode.Space;
     public LayerMask grabMask;
+    public float tryDis = 3f;
 
     [Header("TMP 텍스트 설정")]
-    public TMP_Text stretchLengthText; //  줄자 길이 표시 텍스트
+    public TMP_Text stretchLengthText;
 
     [Header("줄자 효과 (Line 오브젝트 내에 있음)")]
     public Transform lineObject;
@@ -52,6 +53,7 @@ public class RulerController : MonoBehaviour
         if (stretchLengthText != null)
             stretchLengthText.text = "0.0m";
     }
+
     void Update()
     {
         if (!isGrabbing && Input.GetKeyDown(grabKey))
@@ -90,8 +92,8 @@ public class RulerController : MonoBehaviour
         {
             lineCollider.points = new Vector2[]
             {
-            lineObject.InverseTransformPoint(p1),
-            lineObject.InverseTransformPoint(p2)
+                lineObject.InverseTransformPoint(p1),
+                lineObject.InverseTransformPoint(p2)
             };
         }
 
@@ -108,57 +110,53 @@ public class RulerController : MonoBehaviour
         }
     }
 
-
     void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(handle.position, 3f); // grabRange와 같게
+        Gizmos.DrawWireSphere(handle.position, 3f);
     }
+
     void TryGrabNearby()
     {
-        Collider2D[] hits = Physics2D.OverlapCircleAll(handle.position, 1.5f, grabMask);
-        Debug.Log($"[Grab Attempt] Found {hits.Length} colliders nearby.");
+        Collider2D[] hits = Physics2D.OverlapCircleAll(handle.position, tryDis, grabMask);
 
         foreach (var hit in hits)
         {
-            Debug.Log($"으아앙악 {hit.name} with tag {hit.tag}");
+            if (!hit.CompareTag("Box") && !hit.CompareTag("Obj") && !hit.CompareTag("Handle") && !hit.CompareTag("Player")) continue;
 
-            if (!hit.CompareTag("Box") && !hit.CompareTag("Handle") && !hit.CompareTag("Player")) continue;
-
-            if (hit.CompareTag("Box"))
+            if (hit.CompareTag("Box") || hit.CompareTag("Obj"))
             {
-                grabbedObject = FindParentWithNameContains(hit.transform, "box");
-                if (grabbedObject == null)
-                {
-                    Debug.LogWarning("No box root found!");
-                    continue;
-                }
+                grabbedObject = FindParentWithNameContains(hit.transform, "box", "obj");
+                if (grabbedObject == null) continue;
 
                 grabbedObject.SetParent(handle);
+                SpriteRenderer sr = grabbedObject.GetComponent<SpriteRenderer>();
+                if (sr != null)
+                {
+                    float objectWidth = sr.bounds.size.x;
+                    float handleWidth = handle.GetComponent<SpriteRenderer>()?.bounds.size.x ?? 0f;
+                    float offsetX = (objectWidth + handleWidth) * 0.5f + 0.015f;
+                    grabbedObject.localPosition = new Vector3(offsetX, 0f, 0f);
+                    grabbedObject.localEulerAngles = Vector3.zero;
+                    grabbedObject.GetComponent<Rigidbody2D>().isKinematic = true;
+                }
+                else
+                {
+                    grabbedObject.localPosition = new Vector3(0.5f, 0f, 0f); // fallback
+                }
 
-                float boxHalfWidth = grabbedObject.GetComponent<SpriteRenderer>().bounds.size.x * 0.5f;
-                grabbedObject.localPosition = new Vector3(boxHalfWidth + 0.2f, 0f, 0f);
-
-                //  박스의 물리 제어 끄기
                 Rigidbody2D rb = grabbedObject.GetComponent<Rigidbody2D>();
-                if (rb != null)
-                    rb.isKinematic = true;
+                if (rb != null) rb.isKinematic = true;
 
                 isGrabbing = true;
-
-                // 줄 없음
                 lineRenderer?.SetPositions(new Vector3[2]);
                 lineRenderer.enabled = false;
                 lineCollider.enabled = false;
             }
-            else // Player 또는 Handle일 경우
+            else
             {
                 grabbedObject = FindParentWithNameContains(hit.transform, "player");
-                if (grabbedObject == null)
-                {
-                    Debug.LogWarning("No player root found!");
-                    continue;
-                }
+                if (grabbedObject == null) continue;
 
                 handle.SetParent(grabbedObject);
                 isGrabbing = true;
@@ -168,50 +166,7 @@ public class RulerController : MonoBehaviour
 
                 UpdateLine();
             }
-
-            break; // 첫 대상만 잡고 종료
-        }
-    }
-
-    void OnTriggerStay2D(Collider2D collision)
-    {
-        if (!Input.GetKey(grabKey)) return;
-
-        if (!collision.CompareTag("Box") && !collision.CompareTag("Handle")) return;
-
-        // 거리가 너무 멀면 무시
-        float dist = Vector2.Distance(handle.position, collision.transform.position);
-        if (dist > 1.5f) return;
-
-        Debug.Log($"멀다고 이자식아: {collision.name}");
-
-        if (collision.CompareTag("Box"))
-        {
-            grabbedObject = collision.transform;
-            grabbedObject.SetParent(handle);
-
-            // 붙이기 위치 조정
-            float boxHalfWidth = grabbedObject.GetComponent<SpriteRenderer>().bounds.size.x * 0.5f;
-            grabbedObject.localPosition = new Vector3(boxHalfWidth + 0.2f, 0f, 0f);
-
-            isGrabbing = true;
-
-            if (lineRenderer != null) lineRenderer.enabled = true;
-            if (lineCollider != null) lineCollider.enabled = true;
-
-            UpdateLine();
-        }
-        else if (collision.CompareTag("Handle"))
-        {
-            Debug.Log($"잡아라!!!!!!!!!!!!!!!!! {collision.name}");
-            grabbedObject = collision.transform;
-            handle.SetParent(grabbedObject);
-            isGrabbing = true;
-
-            if (lineRenderer != null) lineRenderer.enabled = true;
-            if (lineCollider != null) lineCollider.enabled = true;
-
-            UpdateLine(); // 줄 좌표 즉시 갱신
+            break;
         }
     }
 
@@ -219,10 +174,9 @@ public class RulerController : MonoBehaviour
     {
         isGrabbing = false;
 
-        if (lineRenderer != null) lineRenderer.enabled = true; // 줄 유지
+        if (lineRenderer != null) lineRenderer.enabled = true;
         if (lineCollider != null) lineCollider.enabled = true;
 
-        // 핸들 원래대로 복귀
         handle.SetParent(originalParent);
         StartCoroutine(SmoothHandleReturn());
 
@@ -230,32 +184,38 @@ public class RulerController : MonoBehaviour
         {
             Rigidbody2D rb = grabbedObject.GetComponent<Rigidbody2D>();
 
-            //  Box일 경우: 부모 끊고 물리 다시 켜기
             if (grabbedObject.parent == handle)
             {
                 grabbedObject.SetParent(null);
-
-                if (rb != null)
-                    rb.isKinematic = false;
-
-                Debug.Log("Box was attached to handle, now detached.");
-            }
-            else // Player일 경우: 반동 처리
-            {
-                Vector3 pullTarget = originalParent.position;
-
                 if (rb != null)
                 {
-                    Vector2 dir = (pullTarget - grabbedObject.position).normalized;
-                    float dist = Vector2.Distance(pullTarget, grabbedObject.position);
-                    rb.AddForce(dir * dist * returnForcePower, ForceMode2D.Impulse);
-                    Debug.Log($"Rebound force applied: {dir * dist * returnForcePower}");
+                    rb.isKinematic = false;
+                    rb.bodyType = RigidbodyType2D.Dynamic;
+                }
+            }
+            else
+            {
+                int grabbedLayer = grabbedObject.gameObject.layer;
+                int boxLayer = LayerMask.NameToLayer("Box");
+                int objLayer = LayerMask.NameToLayer("Obj");
+
+                if (grabbedLayer != boxLayer && grabbedLayer != objLayer)
+                {
+                    Vector3 pullTarget = originalParent.position;
+
+                    if (rb != null)
+                    {
+                        Vector2 dir = (pullTarget - grabbedObject.position).normalized;
+                        float dist = Vector2.Distance(pullTarget, grabbedObject.position);
+                        rb.AddForce(dir * dist * returnForcePower, ForceMode2D.Impulse);
+                    }
                 }
             }
         }
 
         stretchLength = 0f;
     }
+
     IEnumerator SmoothHandleReturn()
     {
         if (grabbedObject == null) yield break;
@@ -302,9 +262,7 @@ public class RulerController : MonoBehaviour
             yield return null;
         }
 
-        // 도착 후 물리 다시 활성화
-        if (pulledRb != null)
-            pulledRb.isKinematic = false;
+        if (pulledRb != null) pulledRb.isKinematic = false;
 
         handle.localPosition = originalLocalPos;
         handle.SetParent(originalParent);
@@ -312,32 +270,26 @@ public class RulerController : MonoBehaviour
         if (lineRenderer != null) lineRenderer.enabled = false;
         if (lineCollider != null) lineCollider.enabled = false;
 
-        if (myRb != null)
+        if (myRb != null && lineRenderer != null)
         {
-            Vector2 pullDir = (originalParent.position - toPull.position).normalized;
-
-            // 위로 튕기는 방향 추가
-            Vector2 launchDir = (pullDir + Vector2.up).normalized;
-
+            Vector3 startPos = lineRenderer.GetPosition(0);
+            Vector3 endPos = lineRenderer.GetPosition(1);
+            Vector3 forceDir = (startPos - endPos).normalized;
             float knockPower = Mathf.Clamp(stretchLength, 1f, 10f);
-
-            //  강한 물리 반작용
-            myRb.AddForce(launchDir * knockPower * playerKnockbackPower, ForceMode2D.Impulse);
-
-  
-            Debug.Log($"[반작용 force] {launchDir * knockPower * playerKnockbackPower}");
+            myRb.AddForce(forceDir * knockPower * playerKnockbackPower, ForceMode2D.Impulse);
         }
-        Debug.Log("Entire player pulled to original position.");
 
         grabbedObject = null;
     }
 
-    Transform FindParentWithNameContains(Transform child, string keyword)
+    Transform FindParentWithNameContains(Transform child, string keywordA, string keywordB = null)
     {
         Transform current = child;
         while (current != null)
         {
-            if (current.name.ToLower().Contains(keyword.ToLower())) // 대소문자 무시
+            string lowerName = current.name.ToLower();
+            if (lowerName.Contains(keywordA.ToLower()) ||
+                (keywordB != null && lowerName.Contains(keywordB.ToLower())))
                 return current;
             current = current.parent;
         }

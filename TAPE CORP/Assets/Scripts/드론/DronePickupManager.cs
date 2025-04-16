@@ -4,7 +4,8 @@ using System.Collections.Generic;
 public class DronePickupManager : MonoBehaviour
 {
     public GameObject dronePrefab;
-    public int poolSize = 2;
+    public int poolSize = 5;
+    public KeyCode pressKey = KeyCode.E;
 
     private List<GameObject> dronePool = new List<GameObject>();
     private Dictionary<Transform, GameObject> activePickups = new Dictionary<Transform, GameObject>();
@@ -23,11 +24,15 @@ public class DronePickupManager : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.LeftShift))
         {
-            TryTogglePickup("Grab2P"); // Player2
+            TryTogglePickup("Grab2P");
         }
         else if (Input.GetKeyDown(KeyCode.RightShift))
         {
-            TryTogglePickup("Grab1P"); // Player1
+            TryTogglePickup("Grab1P");
+        }
+        else if (Input.GetKeyDown(pressKey))
+        {
+            TryPickupPackedObjects();
         }
     }
 
@@ -42,7 +47,6 @@ public class DronePickupManager : MonoBehaviour
             {
                 if (activePickups.ContainsKey(player.transform))
                 {
-                    // 해제
                     DronePickupController dpc = activePickups[player.transform].GetComponent<DronePickupController>();
                     dpc.ForceRelease();
                     activePickups.Remove(player.transform);
@@ -59,7 +63,27 @@ public class DronePickupManager : MonoBehaviour
                     }
                 }
 
-                break; // 한 명만 처리
+                break;
+            }
+        }
+    }
+
+    void TryPickupPackedObjects()
+    {
+        GameObject[] packedObjects = GameObject.FindGameObjectsWithTag("Packed");
+
+        foreach (var obj in packedObjects)
+        {
+            if (activePickups.ContainsKey(obj.transform))
+                continue;
+
+            GameObject drone = GetAvailableDrone();
+            if (drone != null)
+            {
+                drone.SetActive(true);
+                DronePickupController dpc = drone.GetComponent<DronePickupController>();
+                dpc.Initialize(obj.transform, this);
+                activePickups[obj.transform] = drone;
             }
         }
     }
@@ -74,11 +98,11 @@ public class DronePickupManager : MonoBehaviour
         return null;
     }
 
-    public void UnmarkPickup(Transform player)
+    public void UnmarkPickup(Transform obj)
     {
-        if (activePickups.ContainsKey(player))
+        if (activePickups.ContainsKey(obj))
         {
-            activePickups.Remove(player);
+            activePickups.Remove(obj);
         }
     }
 }

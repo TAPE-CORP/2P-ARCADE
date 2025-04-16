@@ -9,6 +9,8 @@ TagManager:
   - Bridge
   - Map
   - Holder
+  - Obj
+  - Packed
   layers:
   - Default
   - TransparentFX
@@ -25,8 +27,8 @@ TagManager:
   - Worker
   - Convayor
   - Holder
-  - 
-  - 
+  - Obj
+  - Packed
   - 
   - 
   - 
@@ -51,6 +53,9 @@ TagManager:
     locked: 0
   - name: Map
     uniqueID: 2031672915
+    locked: 0
+  - name: Convayor
+    uniqueID: 528483233
     locked: 0
   - name: Player
     uniqueID: 4215650863

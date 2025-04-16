@@ -422,7 +422,8 @@ MonoBehaviour:
   grabKey: 261
   grabMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 33408
+  tryDis: 3
   stretchLengthText: {fileID: 0}
   lineObject: {fileID: 6928286692866589549}
   lineRenderer: {fileID: 689571635010591115}

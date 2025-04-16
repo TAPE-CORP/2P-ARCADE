@@ -105,15 +105,12 @@ public class DronePickupController : MonoBehaviour
 
         player.SetParent(transform);
 
-        // 처음 상태 저장
         bool hasEnteredCamera = IsInsideCameraView();
         currentLiftSpeed = hasEnteredCamera ? slowLiftSpeed : fastLiftSpeed;
 
         while (true)
         {
             bool isInsideNow = IsInsideCameraView();
-
-            // 밖 → 안일 경우에만 속도 변경
             if (!hasEnteredCamera && isInsideNow)
             {
                 hasEnteredCamera = true;
@@ -125,6 +122,12 @@ public class DronePickupController : MonoBehaviour
 
             transform.position += move;
             UpdateLine(player.position);
+
+            if (transform.position.y > mainCam.transform.position.y + 10f)
+            {
+                TryScoreAndDestroy(player.gameObject);
+                break;
+            }
 
             if (forceReleaseRequested || (Input.GetKeyDown(KeyCode.LeftShift) && player.gameObject.layer == LayerMask.NameToLayer("Grab2P")) ||
                 (Input.GetKeyDown(KeyCode.RightShift) && player.gameObject.layer == LayerMask.NameToLayer("Grab1P")))
@@ -181,5 +184,19 @@ public class DronePickupController : MonoBehaviour
     {
         line.SetPosition(0, transform.position);
         line.SetPosition(1, playerPos);
+    }
+
+    void TryScoreAndDestroy(GameObject obj)
+    {
+        if (obj.CompareTag("Packed"))
+        {
+            BoxObject box = obj.GetComponent<BoxObject>();
+            if (box != null)
+            {
+                ScoreSystem.Instance?.AddScore(Mathf.RoundToInt(box.areaSize));
+            }
+        }
+
+        Destroy(obj);
     }
 }
