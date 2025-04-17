@@ -1020,10 +1020,10 @@ MonoBehaviour:
   - areaSize: 4
     unboxedPrefab: {fileID: 1380689363980071977, guid: 5e1e01008386f514587f31fd8a6a010c, type: 3}
     packedPrefab: {fileID: 5925571734157676209, guid: 250532c659ef1a745990fec1c477ded8, type: 3}
-  - areaSize: 5
+  - areaSize: 2
     unboxedPrefab: {fileID: 4119847904163749858, guid: 6a5d2cbd6460c2b4ebae39f707a035d8, type: 3}
     packedPrefab: {fileID: 2961316401186395917, guid: 4602d5a279721cf4fb1dd3c95b1f5e17, type: 3}
-  spawnInterval: 3.5
+  spawnInterval: 10
 --- !u!4 &241874012
 Transform:
   m_ObjectHideFlags: 0
@@ -2333,12 +2333,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 998cb28035b37b545b2ab01d947fa2b3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  targets:
-  - {fileID: 0}
-  - {fileID: 0}
+  targets: []
   smoothTime: 0.2
   minZoom: 5
-  maxZoom: 30
+  maxZoom: 100
   zoomSpeed: 5
   padding: 2.5
 --- !u!1 &521052825
@@ -3186,7 +3184,7 @@ Transform:
   m_GameObject: {fileID: 653668549}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -9.47, y: 52, z: 0}
+  m_LocalPosition: {x: -6.9, y: 52, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -6040,7 +6038,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: cc6bc492b1459994eb4dde6f068fad25, type: 2}
   - {fileID: 11400000, guid: e8cb7f2faa8941c4c8ad4e637a7d4d6e, type: 2}
   spawnPoint: {fileID: 653668550}
-  spawnInterval: 2
+  spawnInterval: 10
   activeObjects: []
 --- !u!1001 &1159784300
 PrefabInstance:

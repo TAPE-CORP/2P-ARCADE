@@ -5,7 +5,8 @@ using UnityEngine;
 public class MultiTargetCamera : MonoBehaviour
 {
     [Header("타겟들")]
-    public List<Transform> targets;
+    public List<Transform> targets; // 인스펙터에서 보여지는 리스트
+    private List<Transform> validTargets = new List<Transform>(); // 실시간 추적용 내부 리스트
 
     [Header("카메라 이동")]
     public float smoothTime = 0.2f;
@@ -15,7 +16,7 @@ public class MultiTargetCamera : MonoBehaviour
     public float minZoom = 5f;
     public float maxZoom = 20f;
     public float zoomSpeed = 5f;
-    public float padding = 2f;
+    public float padding = 2.5f;
 
     private Camera cam;
 
@@ -26,7 +27,14 @@ public class MultiTargetCamera : MonoBehaviour
 
     void LateUpdate()
     {
-        if (targets.Count == 0) return;
+
+        foreach (var t in targets)
+        {
+            if (t != null)
+                validTargets.Add(t);
+        }
+
+        if (validTargets.Count == 0) return;
 
         Move();
         Zoom();
@@ -38,7 +46,6 @@ public class MultiTargetCamera : MonoBehaviour
         Vector3 desiredPosition = centerPoint;
         desiredPosition.z = transform.position.z;
 
-        // 제한된 위치 보정
         float camHeight = cam.orthographicSize;
         float camWidth = camHeight * cam.aspect;
 
@@ -47,6 +54,7 @@ public class MultiTargetCamera : MonoBehaviour
 
         transform.position = Vector3.SmoothDamp(transform.position, desiredPosition, ref velocity, smoothTime);
     }
+
     void Zoom()
     {
         float requiredSize = GetRequiredSize();
@@ -56,10 +64,10 @@ public class MultiTargetCamera : MonoBehaviour
 
     float GetRequiredSize()
     {
-        var bounds = new Bounds(targets[0].position, Vector3.zero);
-        for (int i = 1; i < targets.Count; i++)
+        var bounds = new Bounds(validTargets[0].position, Vector3.zero);
+        for (int i = 1; i < validTargets.Count; i++)
         {
-            bounds.Encapsulate(targets[i].position);
+            bounds.Encapsulate(validTargets[i].position);
         }
 
         float height = bounds.size.y;
@@ -70,13 +78,13 @@ public class MultiTargetCamera : MonoBehaviour
 
     Vector3 GetCenterPoint()
     {
-        if (targets.Count == 1)
-            return targets[0].position;
+        if (validTargets.Count == 1)
+            return validTargets[0].position;
 
-        var bounds = new Bounds(targets[0].position, Vector3.zero);
-        for (int i = 1; i < targets.Count; i++)
+        var bounds = new Bounds(validTargets[0].position, Vector3.zero);
+        for (int i = 1; i < validTargets.Count; i++)
         {
-            bounds.Encapsulate(targets[i].position);
+            bounds.Encapsulate(validTargets[i].position);
         }
 
         return bounds.center;
