@@ -5,8 +5,8 @@ using UnityEngine;
 public class MultiTargetCamera : MonoBehaviour
 {
     [Header("타겟들")]
-    public List<Transform> targets; // 인스펙터에서 보여지는 리스트
-    private List<Transform> validTargets = new List<Transform>(); // 실시간 추적용 내부 리스트
+    public List<Transform> targets = new List<Transform>(); // 인스펙터 + 런타임 추가용
+    private List<Transform> validTargets = new List<Transform>(); // null 아닌 애들만 추적
 
     [Header("카메라 이동")]
     public float smoothTime = 0.2f;
@@ -27,6 +27,8 @@ public class MultiTargetCamera : MonoBehaviour
 
     void LateUpdate()
     {
+        // 매 프레임마다 살아있는 타겟만 유효 타겟 리스트에 추가
+        validTargets.Clear();
 
         foreach (var t in targets)
         {
@@ -49,8 +51,10 @@ public class MultiTargetCamera : MonoBehaviour
         float camHeight = cam.orthographicSize;
         float camWidth = camHeight * cam.aspect;
 
-        desiredPosition.x = Mathf.Clamp(desiredPosition.x, camWidth, 60f - camWidth);
-        desiredPosition.y = Mathf.Clamp(desiredPosition.y, camHeight, 60f - camHeight);
+        // 그냥 Clamp 빼면 무제한 이동
+        desiredPosition.x = centerPoint.x;
+        desiredPosition.y = centerPoint.y;
+
 
         transform.position = Vector3.SmoothDamp(transform.position, desiredPosition, ref velocity, smoothTime);
     }
@@ -88,5 +92,23 @@ public class MultiTargetCamera : MonoBehaviour
         }
 
         return bounds.center;
+    }
+
+    // 외부에서 타겟 추가용 메서드
+    public void AddTarget(Transform target)
+    {
+        if (target != null && !targets.Contains(target))
+        {
+            targets.Add(target);
+        }
+    }
+
+    // 외부에서 타겟 제거용 메서드 (필요 시)
+    public void RemoveTarget(Transform target)
+    {
+        if (targets.Contains(target))
+        {
+            targets.Remove(target);
+        }
     }
 }
