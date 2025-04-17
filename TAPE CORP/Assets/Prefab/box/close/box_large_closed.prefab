@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 3073041027571642478}
   - component: {fileID: -8786647218392572262}
   - component: {fileID: 8291313703433923432}
+  - component: {fileID: 867472321631899249}
   m_Layer: 16
   m_Name: box_large_closed
   m_TagString: Packed
@@ -158,3 +159,15 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1.59, y: 1.59}
   m_EdgeRadius: 0
+--- !u!114 &867472321631899249
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2961316401186395917}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f258249606f8f048b6390702da52da0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

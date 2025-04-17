@@ -2060,6 +2060,7 @@ MonoBehaviour:
   grabMask:
     serializedVersion: 2
     m_Bits: 768
+  tryDis: 3
   stretchLengthText: {fileID: 1792257853}
   lineObject: {fileID: 1234157902}
   lineRenderer: {fileID: 1234157904}
@@ -4127,6 +4128,7 @@ MonoBehaviour:
   grabMask:
     serializedVersion: 2
     m_Bits: 640
+  tryDis: 3
   stretchLengthText: {fileID: 1579954551}
   lineObject: {fileID: 935386824}
   lineRenderer: {fileID: 935386826}
