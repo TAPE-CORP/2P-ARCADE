@@ -39,6 +39,7 @@ public class ObjectSpawner : MonoBehaviour
         SpawnedObject spawned = obj.AddComponent<SpawnedObject>();
         spawned.data = data;
 
+
         activeObjects.Add(spawned);
     }
 
