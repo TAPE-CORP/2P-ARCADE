@@ -11,6 +11,7 @@ TagManager:
   - Holder
   - Obj
   - Packed
+  - Convayor
   layers:
   - Default
   - TransparentFX

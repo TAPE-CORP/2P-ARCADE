@@ -5,8 +5,8 @@ using UnityEngine;
 public class MultiTargetCamera : MonoBehaviour
 {
     [Header("타겟들")]
-    public List<Transform> targets = new List<Transform>(); // 인스펙터 + 런타임 추가용
-    private List<Transform> validTargets = new List<Transform>(); // null 아닌 애들만 추적
+    public List<Transform> targets = new List<Transform>();
+    private List<Transform> validTargets = new List<Transform>();
 
     [Header("카메라 이동")]
     public float smoothTime = 0.2f;
@@ -18,6 +18,14 @@ public class MultiTargetCamera : MonoBehaviour
     public float zoomSpeed = 5f;
     public float padding = 2.5f;
 
+    [Header("X축 이동 제한")]
+    public float minX = -7f;  // 이동 가능한 최소 X값
+    public float maxX = 70f;  // 이동 가능한 최대 X값
+
+    [Header("Y축 이동 제한")]
+    public float minY = -Mathf.Infinity;  // 이동 가능한 최소 Y값
+    public float maxY = Mathf.Infinity;   // 이동 가능한 최대 Y값
+
     private Camera cam;
 
     void Start()
@@ -27,15 +35,9 @@ public class MultiTargetCamera : MonoBehaviour
 
     void LateUpdate()
     {
-        // 매 프레임마다 살아있는 타겟만 유효 타겟 리스트에 추가
         validTargets.Clear();
-
         foreach (var t in targets)
-        {
-            if (t != null)
-                validTargets.Add(t);
-        }
-
+            if (t != null) validTargets.Add(t);
         if (validTargets.Count == 0) return;
 
         Move();
@@ -44,17 +46,15 @@ public class MultiTargetCamera : MonoBehaviour
 
     void Move()
     {
+        // 모든 타겟의 중앙 위치 계산
         Vector3 centerPoint = GetCenterPoint();
         Vector3 desiredPosition = centerPoint;
         desiredPosition.z = transform.position.z;
 
-        float camHeight = cam.orthographicSize;
-        float camWidth = camHeight * cam.aspect;
-
-        // 그냥 Clamp 빼면 무제한 이동
-        desiredPosition.x = centerPoint.x;
-        desiredPosition.y = centerPoint.y;
-
+        // X축을 지정된 범위 내로 제한
+        desiredPosition.x = Mathf.Clamp(desiredPosition.x, minX, maxX);
+        // Y축을 지정된 범위 내로 제한
+        desiredPosition.y = Mathf.Clamp(desiredPosition.y, minY, maxY);
 
         transform.position = Vector3.SmoothDamp(transform.position, desiredPosition, ref velocity, smoothTime);
     }
@@ -70,13 +70,10 @@ public class MultiTargetCamera : MonoBehaviour
     {
         var bounds = new Bounds(validTargets[0].position, Vector3.zero);
         for (int i = 1; i < validTargets.Count; i++)
-        {
             bounds.Encapsulate(validTargets[i].position);
-        }
 
         float height = bounds.size.y;
         float width = bounds.size.x / cam.aspect;
-
         return Mathf.Max(height, width) / 2f + padding;
     }
 
@@ -87,28 +84,20 @@ public class MultiTargetCamera : MonoBehaviour
 
         var bounds = new Bounds(validTargets[0].position, Vector3.zero);
         for (int i = 1; i < validTargets.Count; i++)
-        {
             bounds.Encapsulate(validTargets[i].position);
-        }
 
         return bounds.center;
     }
 
-    // 외부에서 타겟 추가용 메서드
     public void AddTarget(Transform target)
     {
         if (target != null && !targets.Contains(target))
-        {
             targets.Add(target);
-        }
     }
 
-    // 외부에서 타겟 제거용 메서드 (필요 시)
     public void RemoveTarget(Transform target)
     {
         if (targets.Contains(target))
-        {
             targets.Remove(target);
-        }
     }
 }

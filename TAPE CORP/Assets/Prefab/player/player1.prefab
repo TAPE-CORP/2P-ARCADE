@@ -425,7 +425,7 @@ MonoBehaviour:
   grabKey: 261
   grabMask:
     serializedVersion: 2
-    m_Bits: 33408
+    m_Bits: 0
   tryDis: 3
   stretchLengthText: {fileID: 4896424506792702172}
   lineObject: {fileID: 6928286692866589549}
@@ -460,9 +460,9 @@ Rigidbody2D:
   m_ExcludeLayers:
     serializedVersion: 2
     m_Bits: 0
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_SleepingMode: 1
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
   m_Constraints: 4
 --- !u!114 &2144335254508412473
 MonoBehaviour:
@@ -476,7 +476,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e24a68cf07530bd45984c1eaa7a864e5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  directionLockKey: 261
+  directionLockKey: 303
   moveSpeed: 5
   acceleration: 10
   deceleration: 15
@@ -484,7 +484,10 @@ MonoBehaviour:
   leftKey: 276
   rightKey: 275
   jumpKey: 273
-  interactKey: 274
+  interactKey: 303
+  toggleConveyorKeyA: 305
+  toggleConveyorKeyB: 0
+  conveyors: []
   targetToInteract: {fileID: 0}
   interactionRuler: {fileID: 7495664015025396157}
   rb: {fileID: 8278029410583831584}

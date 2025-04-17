@@ -1,18 +1,26 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class PlayerController : MonoBehaviour
 {
     [Header("방향 고정 키 설정")]
-    public KeyCode directionLockKey = KeyCode.DownArrow; 
-    public float moveSpeed = 5f;            // 최대 속도
-    public float acceleration = 10f;        // 가속도
-    public float deceleration = 15f;        // 감속도
+    public KeyCode directionLockKey = KeyCode.DownArrow;
+    public float moveSpeed = 5f;
+    public float acceleration = 10f;
+    public float deceleration = 15f;
     public float jumpForce = 7f;
 
     public KeyCode leftKey = KeyCode.LeftArrow;
     public KeyCode rightKey = KeyCode.RightArrow;
     public KeyCode jumpKey = KeyCode.UpArrow;
     public KeyCode interactKey = KeyCode.DownArrow;
+
+    [Header("컨베이어 토글 키")]
+    public KeyCode toggleConveyorKeyA = KeyCode.A;
+    public KeyCode toggleConveyorKeyB = KeyCode.B;
+
+    [Header("제어할 Conveyor들 (태그로 자동 수집)")]
+    public List<Conveyor> conveyors = new List<Conveyor>();
 
     public Transform targetToInteract;
     public RulerController interactionRuler;
@@ -22,78 +30,83 @@ public class PlayerController : MonoBehaviour
 
     private float currentVelocityX = 0f;
 
-    public virtual void Start()
+    void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+
+        // "Conveyor" 태그가 설정된 모든 오브젝트에서 Conveyor 컴포넌트를 찾아 리스트에 추가
+        var convObjects = GameObject.FindGameObjectsWithTag("Convayor");
+        conveyors = new List<Conveyor>();
+        foreach (var go in convObjects)
+        {
+            var conv = go.GetComponent<Conveyor>();
+            if (conv != null)
+                conveyors.Add(conv);
+        }
     }
 
-    public virtual void Update()
+    void Update()
     {
+        // ===== 기존 이동/점프 로직 =====
         float targetVelocityX = 0f;
-
-        // 방향 키 입력
         if (Input.GetKey(leftKey))
             targetVelocityX = -moveSpeed;
         else if (Input.GetKey(rightKey))
             targetVelocityX = moveSpeed;
-        // 방향 반전 (잡기 중이면 방향 고정)
-        bool isLocked = interactionRuler != null && interactionRuler.isGrabbing == true;
 
+        bool isLocked = interactionRuler != null && interactionRuler.isGrabbing;
         if (!isLocked)
         {
             if (targetVelocityX > 0.1f)
-                transform.localScale = new Vector3(1, 1, 1);
+                transform.localScale = Vector3.one;
             else if (targetVelocityX < -0.1f)
                 transform.localScale = new Vector3(-1, 1, 1);
         }
 
-        // 관성 보간 처리
         bool isMovingInput = Mathf.Abs(targetVelocityX) > 0.01f;
         float appliedAccel = isMovingInput ? acceleration : deceleration;
-
         currentVelocityX = Mathf.MoveTowards(currentVelocityX, targetVelocityX, appliedAccel * Time.deltaTime);
 
-        // 손 뗐을 때도 살짝 미끄러지게 유지
         if (!isMovingInput && Mathf.Abs(currentVelocityX) < 0.05f)
-        {
-            currentVelocityX = 0f; // 부드럽게 멈추게 보정
-        }
+            currentVelocityX = 0f;
 
         rb.velocity = new Vector2(currentVelocityX, rb.velocity.y);
 
-        // 점프
         if (Input.GetKeyDown(jumpKey) && isGrounded)
-        {
             rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+
+        // ===== Conveyor 방향 토글 =====
+        if (Input.GetKeyDown(toggleConveyorKeyA) || Input.GetKeyDown(toggleConveyorKeyB))
+        {
+            foreach (var conv in conveyors)
+                conv.isRight = !conv.isRight;
+
+            Debug.Log("모든 Conveyor 방향 토글 완료");
         }
     }
-    public void OnCollisionEnter2D(Collision2D collision)
+
+    void OnCollisionEnter2D(Collision2D collision)
     {
-        foreach (ContactPoint2D contact in collision.contacts)
-        {
+        foreach (var contact in collision.contacts)
             if (contact.normal.y > 0.5f)
             {
                 isGrounded = true;
                 return;
             }
-        }
     }
 
-
-    public void OnCollisionStay2D(Collision2D collision)
+    void OnCollisionStay2D(Collision2D collision)
     {
-        foreach (ContactPoint2D contact in collision.contacts)
-        {
+        foreach (var contact in collision.contacts)
             if (contact.normal.y > 0.5f)
             {
                 isGrounded = true;
                 return;
             }
-        }
         isGrounded = false;
     }
 
-    public void OnCollisionExit2D(Collision2D collision)
+    void OnCollisionExit2D(Collision2D collision)
     {
         isGrounded = false;
     }
