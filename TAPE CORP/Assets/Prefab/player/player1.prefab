@@ -291,6 +291,7 @@ GameObject:
   - component: {fileID: 9076230163996663877}
   - component: {fileID: 9177352951513239492}
   - component: {fileID: 4354718068634968105}
+  - component: {fileID: -5365959891969606924}
   m_Layer: 8
   m_Name: player1
   m_TagString: Player
@@ -416,16 +417,16 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2387844099314486664}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 453feb1ec62f05248819c0f5bedfe633, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   handle: {fileID: 6291796960759256075}
-  grabKey: 261
+  grabKey: 307
   grabMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 33408
   tryDis: 3
   stretchLengthText: {fileID: 4896424506792702172}
   lineObject: {fileID: 6928286692866589549}
@@ -471,7 +472,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2387844099314486664}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e24a68cf07530bd45984c1eaa7a864e5, type: 3}
   m_Name: 
@@ -629,6 +630,28 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 0
   triggerKeys: 20000000
+--- !u!114 &-5365959891969606924
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2387844099314486664}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 769729da88e77634ab87a927cb7193c3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveSpeed: 5
+  jumpForce: 12
+  leftKey: 276
+  rightKey: 275
+  jumpKey: 273
+  groundCheck: {fileID: 0}
+  groundCheckRadius: 0.2
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!1 &4291937778251140960
 GameObject:
   m_ObjectHideFlags: 0
