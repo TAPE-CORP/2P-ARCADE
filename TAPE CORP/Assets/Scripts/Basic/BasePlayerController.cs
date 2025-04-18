@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
 public class BasePlayerController : MonoBehaviour
@@ -17,15 +15,16 @@ public class BasePlayerController : MonoBehaviour
     [Header("Ground Layer Mask")]
     public LayerMask groundLayerMask;
 
+    [Tooltip("0=P1, 1=P2 로 매칭하세요")]
+    public int playerIndex = 0;
+
     private Rigidbody2D rb;
     private float horizontalInput;
     private bool isGrounded;
     private int groundContactCount = 0;
-
-    // 초기 스케일을 저장해 둡니다.
     private Vector3 initialScale;
 
-    void Awake()
+    void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         initialScale = transform.localScale;
@@ -33,27 +32,29 @@ public class BasePlayerController : MonoBehaviour
 
     void Update()
     {
-        // 좌우 입력 처리
+        // 좌우 입력
         horizontalInput = 0f;
-        if (Input.GetKey(leftKey))
-            horizontalInput = -1f;
-        else if (Input.GetKey(rightKey))
-            horizontalInput = 1f;
+        if (Input.GetKey(leftKey)) horizontalInput = -1f;
+        if (Input.GetKey(rightKey)) horizontalInput = 1f;
 
-        // 이동 방향에 따라 localScale.x 를 반전
+        // 스케일 반전
         if (horizontalInput > 0f)
             transform.localScale = new Vector3(Mathf.Abs(initialScale.x), initialScale.y, initialScale.z);
         else if (horizontalInput < 0f)
             transform.localScale = new Vector3(-Mathf.Abs(initialScale.x), initialScale.y, initialScale.z);
 
-        // 점프 처리
+        // 점프
         if (Input.GetKeyDown(jumpKey) && isGrounded)
             rb.velocity = new Vector2(rb.velocity.x, jumpForce);
     }
 
     void FixedUpdate()
     {
+        // 실제 이동
         rb.velocity = new Vector2(horizontalInput * moveSpeed, rb.velocity.y);
+
+        // 움직임 판단 (속도 크기로)
+        bool isMoving = rb.velocity.magnitude > 0.1f;
     }
 
     void OnCollisionEnter2D(Collision2D collision)
@@ -70,7 +71,7 @@ public class BasePlayerController : MonoBehaviour
         if (((1 << collision.gameObject.layer) & groundLayerMask.value) != 0)
         {
             groundContactCount = Mathf.Max(groundContactCount - 1, 0);
-            isGrounded = (groundContactCount > 0);
+            isGrounded = groundContactCount > 0;
         }
     }
 }

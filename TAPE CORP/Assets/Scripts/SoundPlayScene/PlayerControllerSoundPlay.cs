@@ -22,21 +22,31 @@ public class PlayerControllerSoundPlay : MonoBehaviour
     [Tooltip("Holder 레이어에 속한 콜라이더와 Stay 인식")]
     public LayerMask holderLayerMask;
 
+    [Header("이동 시 minusSpd 배수")]
+    [Tooltip("기본 minusSpd에 곱해지는 배수 값")]
+    public float upSpd = 1.8f;
+
     private Rigidbody2D rb;
     private Collider2D playerCollider;
     private SpriteRenderer spriteRenderer;
     private int facingDirection = 1;
+
+    // minusSpd 기본값 저장용
+    private float defaultMinusSpd;
 
     // P1 전용
     private GameObject heldObject;
     private ShakeObj heldShakeObj;
     private Collider2D[] heldColliders;
 
-    void Awake()
+    void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         playerCollider = GetComponent<Collider2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
+
+        // ResourceCon 쪽 minusSpd 기본값을 한 번만 저장
+        defaultMinusSpd = ResourceCon.instance.minusSpd;
     }
 
     void Update()
@@ -47,6 +57,18 @@ public class PlayerControllerSoundPlay : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.A)) facingDirection = -1;
             else if (Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.D)) facingDirection = 1;
 
+            // 이동 중이면 기본값 * upSpd, 멈추면 기본값으로 리셋
+            float moveInput = Input.GetAxisRaw("Horizontal");
+            if (Mathf.Abs(moveInput) > 0.1f)
+            {
+                ResourceCon.instance.minusSpd = defaultMinusSpd * upSpd;
+                Debug.Log("이동 중: minusSpd = " + ResourceCon.instance.minusSpd);
+            }
+            else
+            {
+                ResourceCon.instance.minusSpd = defaultMinusSpd;
+            }
+
             // 집기 토글
             if (Input.GetKeyDown(pickUpKey) && heldObject == null)
                 TryPickUp();
@@ -56,7 +78,6 @@ public class PlayerControllerSoundPlay : MonoBehaviour
                 ReleaseHeldObject();
         }
     }
-
     private void TryPickUp()
     {
         // 반경 내 Box 태그 수집
