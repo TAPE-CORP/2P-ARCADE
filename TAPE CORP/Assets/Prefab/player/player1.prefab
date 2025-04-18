@@ -343,7 +343,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: c4dba780698c72e488e5167ed8478849, type: 2}
+  - {fileID: 2100000, guid: 51e40c3c4018b90419811c20c56776e7, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -647,9 +647,7 @@ MonoBehaviour:
   leftKey: 276
   rightKey: 275
   jumpKey: 273
-  groundCheck: {fileID: 0}
-  groundCheckRadius: 0.2
-  groundLayer:
+  groundLayerMask:
     serializedVersion: 2
     m_Bits: 0
 --- !u!1 &4291937778251140960

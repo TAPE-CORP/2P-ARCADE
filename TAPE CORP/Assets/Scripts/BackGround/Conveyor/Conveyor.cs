@@ -6,6 +6,14 @@ public class Conveyor : MonoBehaviour
     public bool isRight = true;
 
     private Vector2 moveDirection;
+    private Vector3 _originalScale;
+
+    void Awake()
+    {
+        // 원본 스케일 저장
+        _originalScale = transform.localScale;
+        ApplyFlip();
+    }
 
     void Update()
     {
@@ -40,7 +48,18 @@ public class Conveyor : MonoBehaviour
 
     public void SetDirection()
     {
+        Debug.Log(" 방향 토글");
         isRight = !isRight;
         moveDirection = isRight ? Vector2.right : Vector2.left;
+        ApplyFlip();
+    }
+
+    // isRight 값에 따라 X축 스케일을 반전
+    private void ApplyFlip()
+    {
+        float flip = isRight ? 1f : -1f;
+        transform.localScale = new Vector3(_originalScale.x * flip,
+                                           _originalScale.y,
+                                           _originalScale.z);
     }
 }

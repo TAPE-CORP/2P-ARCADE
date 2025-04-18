@@ -49,11 +49,11 @@ MonoBehaviour:
   m_LightType: 3
   m_BlendStyleIndex: 0
   m_FalloffIntensity: 0.5
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_Intensity: 0.1
+  m_Color: {r: 1, g: 0.90713394, b: 0, a: 1}
+  m_Intensity: 0.7
   m_LightVolumeIntensity: 1
   m_LightVolumeIntensityEnabled: 0
-  m_ApplyToSortingLayers: 53de1879
+  m_ApplyToSortingLayers: 00000000578c115053de1879a103801f2fba45fb97b5ad3bed207d9c
   m_LightCookieSprite: {fileID: 0}
   m_DeprecatedPointLightCookieSprite: {fileID: 0}
   m_LightOrder: 0
@@ -72,7 +72,7 @@ MonoBehaviour:
   m_PointLightInnerAngle: 360
   m_PointLightOuterAngle: 360
   m_PointLightInnerRadius: 0
-  m_PointLightOuterRadius: 0.1
+  m_PointLightOuterRadius: 0.15
   m_ShapeLightParametricSides: 5
   m_ShapeLightParametricAngleOffset: 0
   m_ShapeLightParametricRadius: 1
@@ -95,4 +95,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76c891deb4c45e848badd39dd5d4345e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fadeDuration: 5
+  light2D: {fileID: 8694806906259684761}
+  fadeDuration: 1
+  initialIntensity: 1

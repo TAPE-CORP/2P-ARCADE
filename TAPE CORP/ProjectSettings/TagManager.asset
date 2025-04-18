@@ -12,6 +12,7 @@ TagManager:
   - Obj
   - Packed
   - Convayor
+  - Electric
   layers:
   - Default
   - TransparentFX
@@ -31,8 +32,8 @@ TagManager:
   - Obj
   - Packed
   - Boundary
-  - 
-  - 
+  - Wave
+  - MIcBlock
   - 
   - 
   - 
@@ -63,4 +64,7 @@ TagManager:
     locked: 0
   - name: Drone
     uniqueID: 1001239959
+    locked: 0
+  - name: Wave
+    uniqueID: 2625446125
     locked: 0

@@ -1,29 +1,50 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
-[RequireComponent(typeof(Renderer))]
+[RequireComponent(typeof(MeshRenderer), typeof(Conveyor))]
 public class ConveyorBeltScroller : MonoBehaviour
 {
-    public Material conveyorMaterial;
+    [Header("ìŠ¤í¬ë¡¤ ì†ë„ (UV/sec)")]
     public float scrollSpeed = 0.5f;
 
-    private Conveyor conveyor;
-    private float baseZRotation;
+    // Builtâ€‘in Unlit/Texture ì…°ì´ë”ì˜ ë©”ì¸ í…ìŠ¤ì³ í”„ë¡œí¼í‹°
+    const string TEX_PROP = "_MainTex";
 
-    void Start()
+    private Conveyor _conveyor;
+    private float _baseZRotation;
+    private MeshRenderer _meshRenderer;
+    private MaterialPropertyBlock _mpb;
+
+    void Awake()
     {
-        conveyor = GetComponent<Conveyor>();
-        baseZRotation = transform.eulerAngles.z; // ½ÃÀÛ °¢µµ ÀúÀå
+        _conveyor = GetComponent<Conveyor>();
+        _meshRenderer = GetComponent<MeshRenderer>();
+        _mpb = new MaterialPropertyBlock();
+        _baseZRotation = transform.eulerAngles.z;
     }
 
     void Update()
     {
-        // ±âÁ¸ °¢µµ + ¹æÇâ¿¡ µû¶ó 0 ¶Ç´Â 180µµ Ãß°¡
-        float targetZ = conveyor.isRight ? baseZRotation : baseZRotation + 180f;
+        // 1) ë²¨íŠ¸ ë°©í–¥ì— ë”°ë¼ íšŒì „
+        float targetZ = _conveyor.isRight
+            ? _baseZRotation
+            : _baseZRotation + 180f;
         transform.rotation = Quaternion.Euler(0f, 0f, targetZ);
 
-        // ÅØ½ºÃ³ ½ºÅ©·Ñ
-        float direction = 1f;
-        float offset = Time.time * scrollSpeed * direction;
-        conveyorMaterial.mainTextureOffset = new Vector2(offset, 0);
+        // 2) UV ìŠ¤í¬ë¡¤
+        _meshRenderer.GetPropertyBlock(_mpb);
+
+        // ì—ë””í„°ì—ì„œ ì§€ì •í•œ íƒ€ì¼ë§ ê°’ì„ ì½ì–´ì˜µë‹ˆë‹¤.
+        Vector2 tiling = _meshRenderer.sharedMaterial.GetTextureScale(TEX_PROP);
+
+        float dir = _conveyor.isRight ? 1f : -1f;
+        float offset = Time.time * scrollSpeed * dir;
+
+        // ST ë²¡í„° = (íƒ€ì¼ë§.x, íƒ€ì¼ë§.y, ì˜¤í”„ì…‹, 0)
+        _mpb.SetVector(
+            TEX_PROP + "_ST",
+            new Vector4(tiling.x, tiling.y, offset, 0f)
+        );
+
+        _meshRenderer.SetPropertyBlock(_mpb);
     }
 }

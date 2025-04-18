@@ -8,6 +8,7 @@ Library: C:\Users\jaewo\2P-ARCADE\TAPE CORP\Temp\BurstOutput\Data\Plugins\x86_64
 --float-precision=Standard
 --target-framework=NetFramework
 --assembly-defines=UnityEngine;
+--assembly-defines=Assembly-CSharp-firstpass;
 --assembly-defines=Assembly-CSharp;
 --assembly-defines=Unity.2D.IK.Runtime;
 --assembly-defines=Unity.RenderPipelines.Core.Runtime;
@@ -36,6 +37,7 @@ Library: C:\Users\jaewo\2P-ARCADE\TAPE CORP\Temp\BurstOutput\Data\Plugins\x86_64
 --assembly-defines=Unity.Collections.LowLevel.ILSupport;
 --assembly-defines=Unity.VisualScripting.Antlr3.Runtime;
 --assembly-defines=Unity.Burst.Unsafe;
+--assembly-defines=DOTween;
 --assembly-defines=System.Runtime;
 --assembly-defines=netstandard;
 --assembly-defines=Mono.Security;
@@ -111,6 +113,7 @@ Library: C:\Users\jaewo\2P-ARCADE\TAPE CORP\Temp\BurstOutput\Data\Plugins\x86_64
 --float-precision=Standard
 --target-framework=NetFramework
 --assembly-defines=UnityEngine;
+--assembly-defines=Assembly-CSharp-firstpass;
 --assembly-defines=Assembly-CSharp;
 --assembly-defines=Unity.2D.IK.Runtime;
 --assembly-defines=Unity.RenderPipelines.Core.Runtime;
@@ -139,6 +142,7 @@ Library: C:\Users\jaewo\2P-ARCADE\TAPE CORP\Temp\BurstOutput\Data\Plugins\x86_64
 --assembly-defines=Unity.Collections.LowLevel.ILSupport;
 --assembly-defines=Unity.VisualScripting.Antlr3.Runtime;
 --assembly-defines=Unity.Burst.Unsafe;
+--assembly-defines=DOTween;
 --assembly-defines=System.Runtime;
 --assembly-defines=netstandard;
 --assembly-defines=Mono.Security;
@@ -216,6 +220,7 @@ Library: C:\Users\jaewo\2P-ARCADE\TAPE CORP\Temp\BurstOutput\Data\Plugins\x86_64
 --target-framework=NetFramework
 --float-mode=Fast
 --assembly-defines=UnityEngine;
+--assembly-defines=Assembly-CSharp-firstpass;
 --assembly-defines=Assembly-CSharp;
 --assembly-defines=Unity.2D.IK.Runtime;
 --assembly-defines=Unity.RenderPipelines.Core.Runtime;
@@ -244,6 +249,7 @@ Library: C:\Users\jaewo\2P-ARCADE\TAPE CORP\Temp\BurstOutput\Data\Plugins\x86_64
 --assembly-defines=Unity.Collections.LowLevel.ILSupport;
 --assembly-defines=Unity.VisualScripting.Antlr3.Runtime;
 --assembly-defines=Unity.Burst.Unsafe;
+--assembly-defines=DOTween;
 --assembly-defines=System.Runtime;
 --assembly-defines=netstandard;
 --assembly-defines=Mono.Security;
@@ -287,6 +293,7 @@ Library: C:\Users\jaewo\2P-ARCADE\TAPE CORP\Temp\BurstOutput\Data\Plugins\x86_64
 --target-framework=NetFramework
 --float-mode=Fast
 --assembly-defines=UnityEngine;
+--assembly-defines=Assembly-CSharp-firstpass;
 --assembly-defines=Assembly-CSharp;
 --assembly-defines=Unity.2D.IK.Runtime;
 --assembly-defines=Unity.RenderPipelines.Core.Runtime;
@@ -315,6 +322,7 @@ Library: C:\Users\jaewo\2P-ARCADE\TAPE CORP\Temp\BurstOutput\Data\Plugins\x86_64
 --assembly-defines=Unity.Collections.LowLevel.ILSupport;
 --assembly-defines=Unity.VisualScripting.Antlr3.Runtime;
 --assembly-defines=Unity.Burst.Unsafe;
+--assembly-defines=DOTween;
 --assembly-defines=System.Runtime;
 --assembly-defines=netstandard;
 --assembly-defines=Mono.Security;
