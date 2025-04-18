@@ -2565,8 +2565,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   prefabToSpawn: {fileID: 2638707727688666690, guid: 36ad10ce39f0ebf49b8091bd1394860b, type: 3}
   spawnCount: 1
-  minYOffset: 3
-  maxYOffset: 3
+  minYOffset: 1
+  maxYOffset: 1
   spawnInterval: 2
 --- !u!4 &1036318622
 Transform:
@@ -3798,9 +3798,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Gage: 100
-  defaultMinusSpd: 1
-  upSpd: 1.8
-  minusSpd: 0.8
+  defaultMinusSpd: 3
+  upSpd: 1.5
+  minusSpd: 1.5
 --- !u!4 &1731109219
 Transform:
   m_ObjectHideFlags: 0
