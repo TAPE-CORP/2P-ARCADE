@@ -74,7 +74,7 @@ MonoBehaviour:
   m_PointLightInnerAngle: 360
   m_PointLightOuterAngle: 360
   m_PointLightInnerRadius: 0
-  m_PointLightOuterRadius: 0.15
+  m_PointLightOuterRadius: 1.59
   m_ShapeLightParametricSides: 5
   m_ShapeLightParametricAngleOffset: 0
   m_ShapeLightParametricRadius: 1
@@ -99,9 +99,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   minIntensity: 0.5
   maxIntensity: 1.5
-  minRadius: 0.2
-  maxRadius: 0.3
-  minFlickerTime: 0.08
+  minRadius: 1.2
+  maxRadius: 1.2
+  minFlickerTime: 0.1
   maxFlickerTime: 0.1
 --- !u!58 &4301600948625700060
 CircleCollider2D:
@@ -150,5 +150,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66c1de038a50253409b00ab768664516, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  minIncrease: 2
-  maxIncrease: 5
+  minIncrease: 8
+  maxIncrease: 8
+  flashIntensity: 0.2
+  flashDuration: 0.3

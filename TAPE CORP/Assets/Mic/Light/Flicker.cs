@@ -1,91 +1,69 @@
-using System.Collections;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 
+[RequireComponent(typeof(Light2D))]
 public class Flicker : MonoBehaviour
 {
-    [Header("Light2D 할당")]
-    [Tooltip("깜빡임 효과를 줄 Light2D 컴포넌트")]
-    public Light2D targetLight;
-    [Tooltip("테스트용 호출 최소 간격 (초)")]
-    public float minTestInterval = 0.5f;
-    [Tooltip("테스트용 호출 최대 간격 (초)")]
-    public float maxTestInterval = 1.5f;
-    [Tooltip("테스트 지속 시간 (초)")]
-    public float testDuration = 10f;
+    public enum LightState { InitialFade, Idle, Flicker }
 
-    [Header("Flicker 설정")]
-    [Tooltip("최소 밝기")]
-    public float minIntensity = 0.02f;
-    [Tooltip("최대 밝기 배율")]
-    public float maxMultiplier = 4f;
-    [Tooltip("한 번 깜빡임에 걸리는 시간 (초)")]
-    public float flickerTime = 0.2f;
-    [Tooltip("깜빡임 곡선 (0→1): 곡선에 따라 밝기가 보간됩니다")]
-    public AnimationCurve flickerCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
+    [Header("초기 페이드 설정")]
+    [Tooltip("시작 시 밝기")]
+    public float initialIntensity = 1f;
+    [Tooltip("시작 밝기 → 0으로 줄어드는 시간 (초)")]
+    public float initialFadeDuration = 5f;
 
-    private float _baseIntensity;
+    [Header("플릭커 설정 (Space)")]
+    [Tooltip("스페이스바 눌렀을 때 즉시 올라갈 밝기")]
+    public float flickerIntensity = 1f;
+    [Tooltip("플릭커가 0으로 돌아가는 시간 (초)")]
+    public float flickerDuration = 0.2f;
+
+    private Light2D _light;
+    private LightState _state;
+    private float _timer;
 
     void Start()
     {
-        if (targetLight == null)
-        {
-            Debug.LogError("Flicker: targetLight를 할당하세요.");
-            enabled = false;
-            return;
-        }
-
-        // 초기 밝기 설정
-        _baseIntensity = minIntensity;
-        targetLight.intensity = _baseIntensity;
-
-        // 테스트용 코루틴
-        StartCoroutine(TestFlicker());
+        _light = GetComponent<Light2D>();
+        // 초기 상태 세팅
+        _state = LightState.InitialFade;
+        _timer = 0f;
+        _light.intensity = initialIntensity;
     }
 
-    /// <summary>
-    /// 자연스러운 깜빡임을 한 번 실행합니다.
-    /// </summary>
-    public void FlickOnce()
+    void Update()
     {
-        StopCoroutine(nameof(DoFlicker));
-        StartCoroutine(nameof(DoFlicker));
-    }
-
-    private IEnumerator DoFlicker()
-    {
-        // 깜빡임마다 최대 밝기 배율을 랜덤하게 뽑고
-        float peak = Random.Range(1f, maxMultiplier);
-        float half = flickerTime * 0.5f;
-        float t = 0f;
-
-        // 밝기가 base → base*peak → base 으로 곡선 보간
-        while (t < flickerTime)
+        switch (_state)
         {
-            t += Time.deltaTime;
-            float normalized = Mathf.Clamp01(t / flickerTime);
-            // curve: 0→1, use symmetric up/down
-            float curveVal = flickerCurve.Evaluate(normalized);
-            // current multiplier: 1→peak→1
-            float currentMul = Mathf.Lerp(1f, peak, curveVal);
-            // apply intensity
-            targetLight.intensity = _baseIntensity * currentMul;
-            yield return null;
-        }
+            case LightState.InitialFade:
+                _timer += Time.deltaTime;
+                float t0 = Mathf.Clamp01(_timer / initialFadeDuration);
+                _light.intensity = Mathf.Lerp(initialIntensity, 0f, t0);
+                if (t0 >= 1f)
+                {
+                    _state = LightState.Idle;
+                }
+                break;
 
-        // 끝나면 반드시 원래 밝기로 복원
-        targetLight.intensity = _baseIntensity;
-    }
+            case LightState.Idle:
+                // 페이드 끝난 후 대기 상태
+                if (Input.GetKeyDown(KeyCode.Space))
+                {
+                    _state = LightState.Flicker;
+                    _timer = 0f;
+                    _light.intensity = flickerIntensity;
+                }
+                break;
 
-    private IEnumerator TestFlicker()
-    {
-        float elapsed = 0f;
-        while (elapsed < testDuration)
-        {
-            FlickOnce();
-            float wait = Random.Range(minTestInterval, maxTestInterval);
-            yield return new WaitForSeconds(wait);
-            elapsed += wait;
+            case LightState.Flicker:
+                _timer += Time.deltaTime;
+                float t1 = Mathf.Clamp01(_timer / flickerDuration);
+                _light.intensity = Mathf.Lerp(flickerIntensity, 0f, t1);
+                if (t1 >= 1f)
+                {
+                    _state = LightState.Idle;
+                }
+                break;
         }
     }
 }

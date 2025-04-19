@@ -13,6 +13,7 @@ TagManager:
   - Packed
   - Convayor
   - Electric
+  - Sound
   layers:
   - Default
   - TransparentFX
@@ -21,8 +22,8 @@ TagManager:
   - Water
   - UI
   - Ground
-  - Grab2P
-  - Grab1P
+  - SoundPlayer
+  - LightPlayer
   - Box
   - BackGround
   - Bridge
@@ -34,8 +35,8 @@ TagManager:
   - Boundary
   - Wave
   - MIcBlock
-  - 
-  - 
+  - Enemy
+  - BackGroundLight
   - 
   - 
   - 
@@ -62,9 +63,12 @@ TagManager:
   - name: Player
     uniqueID: 4215650863
     locked: 0
-  - name: Drone
+  - name: ChaseLight
     uniqueID: 1001239959
     locked: 0
   - name: Wave
     uniqueID: 2625446125
+    locked: 0
+  - name: ChaseSound
+    uniqueID: 3075261103
     locked: 0

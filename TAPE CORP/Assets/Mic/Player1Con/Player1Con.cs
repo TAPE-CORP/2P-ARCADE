@@ -7,6 +7,7 @@ using UnityEngine.Rendering.Universal;
 public class Player1Con : MonoBehaviour
 {
     public Camera P1Cam;
+
     [Header("손전등 Transform (Player 자식으로 두세요)")]
     public Transform flashlight;
 
@@ -21,8 +22,18 @@ public class Player1Con : MonoBehaviour
     [Header("전기 활성화 기간 (초)")]
     public float electricActiveTime = 3f;
 
+    [Header("클릭 자원 감소 설정")]
+    [Tooltip("클릭 홀드 시작 시 기본 초당 감소량")]
+    public float clickDrainBase = 1f;
+    [Tooltip("클릭 홀드 누적시간당 추가 초당 감소량")]
+    public float clickDrainAccel = 1f;
+
     private Vector3 _originalScale;
     private Color _originalColor;
+    private float _originalOuterRadius;
+
+    // 클릭 누적 시간
+    private float clickHoldTime = 0f;
 
     void Start()
     {
@@ -33,25 +44,26 @@ public class Player1Con : MonoBehaviour
         if (flashlightLight == null)
             Debug.LogError("Light2D 컴포넌트를 할당하세요.");
         else
+        {
             _originalColor = flashlightLight.color;
+            _originalOuterRadius = flashlightLight.pointLightOuterRadius;
+        }
     }
 
     void Update()
     {
         if (flashlight == null) return;
 
-        // 1) 마우스 월드 좌표
+        // 1) 마우스 월드 좌표 & 방향
         Vector3 mouseWorld = P1Cam.ScreenToWorldPoint(Input.mousePosition);
         mouseWorld.z = flashlight.position.z;
-
-        // 2) 방향 벡터 계산
         Vector3 dir = (mouseWorld - flashlight.position).normalized;
 
-        // 3) 손전등 회전 (기본 위쪽 보정)
+        // 2) 손전등 회전
         float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
         flashlight.rotation = Quaternion.Euler(0f, 0f, angle - 90f);
 
-        // 4) 캐릭터 좌우 반전
+        // 3) 캐릭터 좌우 반전
         bool faceLeft = dir.x < 0f;
         transform.localScale = new Vector3(
             faceLeft ? -Mathf.Abs(_originalScale.x) : Mathf.Abs(_originalScale.x),
@@ -59,17 +71,42 @@ public class Player1Con : MonoBehaviour
             _originalScale.z
         );
 
-        // 5) 마우스 클릭 시 전기 플래시 효과
+        // 4) 클릭 중 라이트 반경 확장
+        if (Input.GetMouseButton(0))
+        {
+            flashlightLight.pointLightOuterRadius = _originalOuterRadius * 2f;
+        }
+        else
+        {
+            flashlightLight.pointLightOuterRadius = _originalOuterRadius;
+        }
+
+        // 5) 클릭 중 자원(Gage) 감소
+        if (Input.GetMouseButton(0))
+        {
+            clickHoldTime += Time.deltaTime;
+            float clickDrainRate = clickDrainBase + clickDrainAccel * clickHoldTime;
+            if (ResourceCon.instance != null)
+            {
+                ResourceCon.instance.Gage -= clickDrainRate * Time.deltaTime;
+            }
+        }
+        else
+        {
+            clickHoldTime = 0f;
+        }
+
+        // 6) 클릭 순간 전기 효과
         if (Input.GetMouseButtonDown(0))
             StartCoroutine(ElectricFlash());
     }
 
     private IEnumerator ElectricFlash()
     {
-        // 1) 라이트 컬러 변경
+        // 라이트 색상 변경
         flashlightLight.color = electricColor;
 
-        // 2) 반경 내 Electric 태그 오브젝트의 Conveyor만 한 번씩 반전
+        // Electric 태그 오브젝트 처리
         float radius = detectRadius > 0f
             ? detectRadius
             : flashlightLight.pointLightOuterRadius;
@@ -89,42 +126,36 @@ public class Player1Con : MonoBehaviour
             }
         }
 
-        // 3) 잠깐 대기 후 색상 복원
+        // 대기 후 색상 복원
         yield return new WaitForSeconds(1f);
         flashlightLight.color = _originalColor;
     }
 
     private IEnumerator ActivateUserComponents(GameObject obj, float duration)
     {
-        // UnityEngine 네임스페이스가 아닌, 사용자 정의 MonoBehaviour만 선택
         var components = obj
             .GetComponents<MonoBehaviour>()
             .Where(c =>
             {
                 if (c == null) return false;
                 var ns = c.GetType().Namespace;
-                // 네임스페이스가 없거나 UnityEngine으로 시작하지 않으면 사용자 스크립트
                 return string.IsNullOrEmpty(ns) || !ns.StartsWith("UnityEngine");
             })
             .ToArray();
 
-        // 활성화
         foreach (var comp in components)
         {
-            // Conveyor 스크립트라면 isRight 반전
             if (comp.GetType().Name == nameof(Conveyor))
             {
                 var conveyor = comp as Conveyor;
                 if (conveyor != null)
-                    conveyor.SetDirection();  // 내부에서 ApplyFlip까지 처리됩니다.
+                    conveyor.SetDirection();
             }
-
             comp.enabled = true;
         }
 
         yield return new WaitForSeconds(duration);
 
-        // 비활성화
         foreach (var comp in components)
         {
             comp.enabled = false;

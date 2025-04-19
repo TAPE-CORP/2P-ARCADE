@@ -77,7 +77,7 @@ SpriteRenderer:
   m_SortingLayer: 6
   m_SortingOrder: 0
   m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
-  m_Color: {r: 1, g: 0.8980392, b: 0, a: 0}
+  m_Color: {r: 1, g: 0.8980392, b: 0, a: 0.54509807}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -101,12 +101,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   expandDuration: 0.5
   maxRadius: 5
-  wallLayerMask:
-    serializedVersion: 2
-    m_Bits: 0
-  lightDecalPrefab: {fileID: 0}
-  maxDecals: 400
-  decalScatter: 0.1
+  targetTag: Sound
+  lightDecalPrefab: {fileID: 5823075497122360114, guid: 253567c95191d4347b1951f0687f3693, type: 3}
+  maxDecals: 10
+  decalScatter: 0
 --- !u!58 &7172173054423135305
 CircleCollider2D:
   m_ObjectHideFlags: 0

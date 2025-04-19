@@ -9,8 +9,10 @@ public class WaveRipple : MonoBehaviour
     public float expandDuration = 1f;
     [Tooltip("파동 최대 반경 (월드 단위)")]
     public float maxRadius = 5f;
-    [Tooltip("벽 레이어 마스크")]
-    public LayerMask wallLayerMask;
+
+    [Header("판정 대상 태그")]
+    [Tooltip("파동에 반응할 오브젝트의 태그")]
+    public string targetTag = "Sound";
 
     [Header("잔상 데칼")]
     [Tooltip("빛 잔상 데칼 프리팹 (DecalFade 스크립트 포함)")]
@@ -70,30 +72,28 @@ public class WaveRipple : MonoBehaviour
         Destroy(gameObject);
     }
 
-    // WaveRipple.PaintLightTrails 내부
+    // Sound 태그가 붙은 물체에만 데칼을 찍습니다.
     private void PaintLightTrails()
     {
-        var hits = Physics2D.OverlapCircleAll(_center, _worldRadius, wallLayerMask);
+        var hits = Physics2D.OverlapCircleAll(_center, _worldRadius);
         if (hits.Length == 0 || lightDecalPrefab == null) return;
 
-        int placed = 0;
-        while (placed < maxDecals)
+        foreach (var col in hits)
         {
-            Vector2 rnd = Random.insideUnitCircle * _worldRadius + _center;
-            foreach (var wall in hits)
-            {
-                if (wall.OverlapPoint(rnd))
-                {
-                    Vector3 pos = new Vector3(
-                        rnd.x,
-                        rnd.y,
-                        wall.transform.position.z - 0.01f
-                    );
-                    var go = Instantiate(lightDecalPrefab, pos, Quaternion.identity, wall.transform);
-                    placed++;
-                    break;
-                }
-            }
+            if (!col.CompareTag(targetTag))
+                continue;
+
+            // 파동의 중심(_center)과 해당 콜라이더 간의 가장 가까운 지점을 가져옵니다.
+            Vector2 contactPoint = col.ClosestPoint(_center);
+
+            // z-축은 콜라이더의 z보다 살짝 앞에 배치
+            Vector3 decalPos = new Vector3(
+                contactPoint.x,
+                contactPoint.y,
+                col.transform.position.z - 0.01f
+            );
+
+            Instantiate(lightDecalPrefab, decalPos, Quaternion.identity, col.transform);
         }
     }
 }

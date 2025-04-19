@@ -30,6 +30,10 @@ public class MicDecibelMeter : MonoBehaviour
     [Header("레이 발사 기준 트랜스폼")]
     public Transform spawnMarker;
 
+    [Header("사운드 자원 감소 설정")]
+    [Tooltip("RMS * 이 값 * spawnInterval 만큼 Gage가 감소합니다.")]
+    public float soundDrainFactor = 5f;
+
     private AudioSource _audioSource;
     private float[] _samples;
     private float _spawnTimer;
@@ -53,7 +57,7 @@ public class MicDecibelMeter : MonoBehaviour
             },
             actionOnGet: go =>
             {
-                go.transform.SetParent(null);  // <- 여기에서 부모 해제 (중요!)
+                go.transform.SetParent(null);
                 go.SetActive(true);
             },
             actionOnRelease: go => go.SetActive(false),
@@ -62,7 +66,6 @@ public class MicDecibelMeter : MonoBehaviour
             defaultCapacity: poolCapacity,
             maxSize: poolCapacity * 2
         );
-
     }
 
     void Start()
@@ -86,6 +89,7 @@ public class MicDecibelMeter : MonoBehaviour
 
     void Update()
     {
+        // LeftShift를 눌러야만 파동/레이 처리 & 자원 소모 시작
         if (!Input.GetKey(KeyCode.LeftShift))
         {
             _spawnTimer = spawnInterval;
@@ -96,11 +100,18 @@ public class MicDecibelMeter : MonoBehaviour
         if (_spawnTimer < spawnInterval) return;
         _spawnTimer = 0f;
 
+        // 1) RMS 계산
         float rms = GetRMS();
-        float waveRadius = rms * waveScaleFactor;
-        float rayLength = rms * rayLengthFactor;
 
-        // 중앙 파동 효과 생성
+        // 2) 볼륨에 비례해 자원(Gage) 감소
+        if (ResourceCon.instance != null)
+        {
+            // spawnInterval 동안 rms 크기에 따라 Gage 소모
+            ResourceCon.instance.Gage -= rms * soundDrainFactor * spawnInterval;
+        }
+
+        // 3) 파동 이펙트
+        float waveRadius = rms * waveScaleFactor;
         if (wavePrefab != null)
         {
             var centerWave = Instantiate(wavePrefab, spawnMarker.position, Quaternion.identity);
@@ -108,7 +119,8 @@ public class MicDecibelMeter : MonoBehaviour
                 centerRipple.Initialize(waveRadius);
         }
 
-        // 레이 발사 후 충돌 시 라이트 활성화
+        // 4) 레이 발사 & 라이트 스폰
+        float rayLength = rms * rayLengthFactor;
         Vector2 origin = spawnMarker.position;
         float stepDeg = 360f / rayCount;
 
@@ -126,7 +138,6 @@ public class MicDecibelMeter : MonoBehaviour
                 lightGo.transform.SetParent(hit.collider.transform, worldPositionStays: true);
                 lightGo.transform.position = hit.point;
 
-                // 라이트 초기화 호출 (핵심 추가 부분)
                 if (lightGo.TryGetComponent<Light2DFade>(out var fade))
                     fade.Initialize();
             }

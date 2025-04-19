@@ -10,9 +10,9 @@ GameObject:
   m_Component:
   - component: {fileID: 474579895656140869}
   - component: {fileID: 4575788514909786192}
-  - component: {fileID: 1188218428466380399}
   - component: {fileID: 7172173054423135305}
   - component: {fileID: 3069004473272323425}
+  - component: {fileID: -485951294523486104}
   m_Layer: 18
   m_Name: Wave2
   m_TagString: Untagged
@@ -87,26 +87,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &1188218428466380399
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5823075497122360114}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3300be0398b02e54ebf0de3d9aaa9748, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  expandDuration: 0.5
-  maxRadius: 5
-  wallLayerMask:
-    serializedVersion: 2
-    m_Bits: 0
-  lightDecalPrefab: {fileID: 0}
-  maxDecals: 400
-  decalScatter: 0.1
 --- !u!58 &7172173054423135305
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -169,3 +149,17 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
+--- !u!114 &-485951294523486104
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5823075497122360114}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c5f13a358480584abd34fa0caec075b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  fadeDuration: 0.8
+  maxSpread: 3

@@ -1,57 +1,99 @@
 using UnityEngine;
+using UnityEngine.AI;
 
-public class RandomAboveMapSpawner : MonoBehaviour
+[RequireComponent(typeof(Collider2D))]
+public class RandomNavMeshSpawner : MonoBehaviour
 {
     [Header("Prefab to Spawn")]
+    [Tooltip("스폰할 프리팹")]
     public GameObject prefabToSpawn;
 
     [Header("Spawn Settings")]
     [Tooltip("한 번에 몇 개를 스폰할지")]
     public int spawnCount = 1;
-    [Tooltip("Map 태그 오브젝트 위쪽으로 띄울 최소 Y 오프셋")]
-    public float minYOffset = 1f;
-    [Tooltip("Map 태그 오브젝트 위쪽으로 띄울 최대 Y 오프셋")]
-    public float maxYOffset = 3f;
     [Tooltip("스폰 간격 (초)")]
     public float spawnInterval = 5f;
+    [Tooltip("뷰포트 내에서 찾기 위한 최대 시도 횟수")]
+    public int maxAttemptsPerSpawn = 10;
+
+    private NavMeshTriangulation _navTri;
+    private Camera _cam;
+    private int _triCount;
 
     void Start()
     {
-        // 0초 후 첫 스폰, 이후 spawnInterval마다 반복 호출
-        InvokeRepeating(nameof(SpawnAboveRandomMapObjects), 0f, spawnInterval);
+        // NavMesh 데이터 미리 가져두기
+        _navTri = NavMesh.CalculateTriangulation();
+        _triCount = _navTri.indices.Length / 3;
+        if (_triCount == 0)
+            Debug.LogWarning("NavMesh가 비어 있습니다. 먼저 NavMesh를 베이크하세요.");
+
+        // 메인 카메라 캐시
+        _cam = Camera.main;
+        if (_cam == null)
+            Debug.LogError("메인 카메라가 없습니다. 태그가 MainCamera로 설정되어 있는지 확인하세요.");
+
+        // 반복 호출
+        InvokeRepeating(nameof(SpawnOnNavMesh), 0f, spawnInterval);
     }
 
     /// <summary>
-    /// "Map" 태그가 붙은 오브젝트 중 랜덤으로 골라,
-    /// 그 오브젝트의 Renderer.bounds 위쪽의 랜덤 지점에 prefab을 생성합니다.
+    /// NavMesh 위의 임의 지점 중 카메라 뷰 안에 있는 곳을 골라 스폰합니다.
     /// </summary>
-    public void SpawnAboveRandomMapObjects()
+    void SpawnOnNavMesh()
     {
-        var maps = GameObject.FindGameObjectsWithTag("Map");
-        if (maps.Length == 0)
-        {
-            Debug.LogWarning("Map 태그가 붙은 오브젝트가 없습니다.");
+        if (_triCount == 0 || _cam == null)
             return;
-        }
 
         for (int i = 0; i < spawnCount; i++)
         {
-            // 1) 랜덤 Map 오브젝트 선택
-            var target = maps[Random.Range(0, maps.Length)];
-            var rend = target.GetComponent<Renderer>();
-            if (rend == null)
+            Vector3 spawnPos = Vector3.zero;
+            bool found = false;
+
+            // 최대 maxAttemptsPerSpawn회만 위치를 시도
+            for (int attempt = 0; attempt < maxAttemptsPerSpawn; attempt++)
             {
-                Debug.LogWarning($"{target.name}에 Renderer가 없어 위치 계산을 건너뜁니다.");
-                continue;
+                // 랜덤 삼각형 선택
+                int t = Random.Range(0, _triCount) * 3;
+                Vector3 a = _navTri.vertices[_navTri.indices[t]];
+                Vector3 b = _navTri.vertices[_navTri.indices[t + 1]];
+                Vector3 c = _navTri.vertices[_navTri.indices[t + 2]];
+
+                // 삼각형 내부 랜덤 지점 계산
+                spawnPos = RandomPointInTriangle(a, b, c);
+
+                // 뷰포트 좌표 확인
+                Vector3 vp = _cam.WorldToViewportPoint(spawnPos);
+                if (vp.z > 0f && vp.x >= 0f && vp.x <= 1f && vp.y >= 0f && vp.y <= 1f)
+                {
+                    found = true;
+                    break;
+                }
             }
 
-            // 2) Renderer.bounds를 이용해 가로 범위와 상단 y 계산
-            Bounds b = rend.bounds;
-            float x = Random.Range(b.min.x, b.max.x);
-            float y = b.max.y + Random.Range(minYOffset, maxYOffset);
-
-            // 3) 스폰
-            Instantiate(prefabToSpawn, new Vector3(x, y, target.transform.position.z), Quaternion.identity);
+            if (found)
+            {
+                Instantiate(prefabToSpawn, spawnPos, Quaternion.identity);
+            }
+            else
+            {
+                Debug.LogWarning($"뷰포트 내 유효 스폰 위치를 찾지 못했습니다 (시도: {maxAttemptsPerSpawn}회).");
+            }
         }
+    }
+
+    /// <summary>
+    /// 삼각형(a, b, c) 내부에서 균등 분포한 점을 반환합니다.
+    /// </summary>
+    private Vector3 RandomPointInTriangle(Vector3 a, Vector3 b, Vector3 c)
+    {
+        float r = Random.value;
+        float s = Random.value;
+        if (r + s > 1f)
+        {
+            r = 1f - r;
+            s = 1f - s;
+        }
+        return a + r * (b - a) + s * (c - a);
     }
 }
