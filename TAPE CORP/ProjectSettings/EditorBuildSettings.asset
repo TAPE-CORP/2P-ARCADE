@@ -8,7 +8,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Mic/TitleScene.unity
     guid: 2efa81eaf6e2d304baf64c7547d13d1d
-  - enabled: 0
+  - enabled: 1
     path: Assets/Mic/SoundPlay.unity
     guid: a1cba832afddae143a13fab2516a1d42
   m_configObjects: {}

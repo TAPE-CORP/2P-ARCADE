@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.Pool;
 using UnityEngine.Rendering.Universal;
@@ -5,6 +6,10 @@ using UnityEngine.Rendering.Universal;
 [RequireComponent(typeof(AudioSource))]
 public class MicDecibelMeter : MonoBehaviour
 {
+    [Header("레이 발사 임계값")]
+    [Tooltip("RMS 값이 이 임계값 이상일 때만 레이를 발사합니다.")]
+    public float rmsThreshold = 0.02f;
+
     [Header("마이크 설정")]
     public string micDevice = "";
     public int sampleRate = 44100;
@@ -19,6 +24,8 @@ public class MicDecibelMeter : MonoBehaviour
     [Header("레이 길이 설정")]
     [Tooltip("RMS * 이 값 = 레이 길이")]
     public float rayLengthFactor = 5f;
+    [Tooltip("레이 최소 길이 (충돌 범위 확보)")]
+    public float minRayLength = 1f;
     public int rayCount = 16;
     [Tooltip("충돌 검사할 벽 레이어")]
     public LayerMask targetLayerMask;
@@ -42,7 +49,6 @@ public class MicDecibelMeter : MonoBehaviour
     void Awake()
     {
         _samples = new float[sampleWindow];
-
         if (spawnMarker == null)
             spawnMarker = transform;
 
@@ -85,11 +91,12 @@ public class MicDecibelMeter : MonoBehaviour
         _audioSource.mute = true;
         while (Microphone.GetPosition(micDevice) <= 0) { }
         _audioSource.Play();
+
+        Debug.Log($"[MicDecibelMeter] 마이크 시작: {micDevice}, 샘플 윈도우: {sampleWindow}");
     }
 
     void Update()
     {
-        // LeftShift를 눌러야만 파동/레이 처리 & 자원 소모 시작
         if (!Input.GetKey(KeyCode.LeftShift))
         {
             _spawnTimer = spawnInterval;
@@ -100,46 +107,75 @@ public class MicDecibelMeter : MonoBehaviour
         if (_spawnTimer < spawnInterval) return;
         _spawnTimer = 0f;
 
-        // 1) RMS 계산
         float rms = GetRMS();
+        Debug.Log($"[MicDecibelMeter] RMS: {rms:F4}");
 
-        // 2) 볼륨에 비례해 자원(Gage) 감소
-        if (ResourceCon.instance != null)
+        if (rms < rmsThreshold)
         {
-            // spawnInterval 동안 rms 크기에 따라 Gage 소모
-            ResourceCon.instance.Gage -= rms * soundDrainFactor * spawnInterval;
+            Debug.Log($"[RayDebug] RMS {rms:F4} < Threshold {rmsThreshold:F4}, 레이 발사 생략");
+            return;
         }
 
-        // 3) 파동 이펙트
-        float waveRadius = rms * waveScaleFactor;
+        if (ResourceCon.instance != null)
+        {
+            float drain = rms * soundDrainFactor * spawnInterval;
+            ResourceCon.instance.Gage -= drain;
+            Debug.Log($"[MicDecibelMeter] ResourceCon Gage -{drain:F2} → {ResourceCon.instance.Gage:F2}");
+        }
+
         if (wavePrefab != null)
         {
+            float waveRadius = rms * waveScaleFactor;
             var centerWave = Instantiate(wavePrefab, spawnMarker.position, Quaternion.identity);
             if (centerWave.TryGetComponent<WaveRipple>(out var centerRipple))
                 centerRipple.Initialize(waveRadius);
         }
 
-        // 4) 레이 발사 & 라이트 스폰
-        float rayLength = rms * rayLengthFactor;
-        Vector2 origin = spawnMarker.position;
+        float rayLength = Mathf.Max(rms * rayLengthFactor, minRayLength);
+        Vector2 origin2D = new Vector2(spawnMarker.position.x, spawnMarker.position.y);
         float stepDeg = 360f / rayCount;
+
+        // LayerMask 비트 패턴 디버깅
+        string maskBits = Convert.ToString(targetLayerMask.value, 2).PadLeft(32, '0');
+        Debug.Log($"[RayDebug] LayerMask value: {targetLayerMask.value} (bits: {maskBits})");
 
         for (int i = 0; i < rayCount; i++)
         {
-            float ang = stepDeg * i * Mathf.Deg2Rad;
-            Vector2 dir = new Vector2(Mathf.Cos(ang), Mathf.Sin(ang));
+            float rad = stepDeg * i * Mathf.Deg2Rad;
+            Vector2 dir = new Vector2(Mathf.Cos(rad), Mathf.Sin(rad));
+            Vector2 rayOrigin = origin2D + dir * 0.05f;
 
-            Debug.DrawRay(origin, dir * rayLength, Color.yellow, spawnInterval);
+            Debug.Log(
+                $"[RayDebug] #{i}\n" +
+                $"  Origin: {rayOrigin}\n" +
+                $"  Dir: {dir} (angle: {stepDeg * i}°)\n" +
+                $"  Length: {rayLength:F2}"
+            );
 
-            var hit = Physics2D.Raycast(origin, dir, rayLength, targetLayerMask);
+            Debug.DrawRay(rayOrigin, dir * rayLength, Color.yellow, spawnInterval);
+            RaycastHit2D hit = Physics2D.Raycast(rayOrigin, dir, rayLength, targetLayerMask.value);
+
             if (hit.collider != null)
             {
+                Debug.Log(
+                    $"[RayDebug] → HIT #{i}\n" +
+                    $"    Collider Name: {hit.collider.name}\n" +
+                    $"    Tag: {hit.collider.tag}\n" +
+                    $"    IsTrigger: {hit.collider.isTrigger}\n" +
+                    $"    Distance: {hit.distance:F2}\n" +
+                    $"    Hit Point: {hit.point}\n" +
+                    $"    Normal: {hit.normal}"
+                );
+
                 var lightGo = _lightPool.Get();
                 lightGo.transform.SetParent(hit.collider.transform, worldPositionStays: true);
                 lightGo.transform.position = hit.point;
-
                 if (lightGo.TryGetComponent<Light2DFade>(out var fade))
                     fade.Initialize();
+            }
+            else
+            {
+                Debug.Log($"[RayDebug] → MISS #{i} (no collider within {rayLength:F2})");
             }
         }
     }

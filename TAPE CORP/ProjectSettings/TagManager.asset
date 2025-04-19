@@ -72,3 +72,9 @@ TagManager:
   - name: ChaseSound
     uniqueID: 3075261103
     locked: 0
+  - name: SoundDectectBlock
+    uniqueID: 1195154279
+    locked: 0
+  - name: LightDetectBlock
+    uniqueID: 2464765771
+    locked: 0

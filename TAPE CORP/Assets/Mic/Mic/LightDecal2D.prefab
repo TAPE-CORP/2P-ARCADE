@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 7235333821274600558}
   - component: {fileID: 8694806906259684761}
   - component: {fileID: 4788301369582876893}
-  m_Layer: 3
+  m_Layer: 0
   m_Name: LightDecal2D
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -27,7 +27,7 @@ Transform:
   m_GameObject: {fileID: 2638707727688666690}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.43776977, y: -3.3685822, z: 0.12483344}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
