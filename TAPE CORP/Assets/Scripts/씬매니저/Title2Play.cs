@@ -70,6 +70,6 @@ public class Title2Play : MonoBehaviour
         }
 
         // ¾À ÀüÈ¯
-        SceneCon.Instance?.LoadScene("PlayScene");
+        SceneCon.Instance?.LoadScene("SoundPlay");
     }
 }

@@ -1,7 +1,8 @@
-﻿using UnityEngine;
+﻿// BasePlayerController.cs
+using UnityEngine;
 using UnityEngine.Rendering.Universal;
 
-[RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
 public class BasePlayerController : MonoBehaviour
 {
     [Header("Movement Settings")]
@@ -20,28 +21,37 @@ public class BasePlayerController : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        // 중력 해제
         rb.gravityScale = 0f;
         rb.freezeRotation = true;
+
+        // 플레이어 콜라이더가 트리거가 아니어야 하는 경우:
+        // GetComponent<Collider2D>().isTrigger = false;
+        // 적 쪽 콜라이더의 Is Trigger를 에디터에서 켜두세요.
     }
 
     void Update()
     {
-        // 입력 읽기
         moveInput = Vector2.zero;
         if (Input.GetKey(leftKey)) moveInput.x = -1f;
         if (Input.GetKey(rightKey)) moveInput.x = 1f;
         if (Input.GetKey(upKey)) moveInput.y = 1f;
         if (Input.GetKey(downKey)) moveInput.y = -1f;
-
-        // 대각선일 때 움직임 정규화
         if (moveInput.sqrMagnitude > 1f)
             moveInput.Normalize();
     }
 
     void FixedUpdate()
     {
-        // Rigidbody2D로 이동
         rb.velocity = moveInput * moveSpeed;
+    }
+
+    // 트리거 충돌 감지로 변경
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.gameObject.layer == LayerMask.NameToLayer("Enemy"))
+        {
+            if (GameManager.Instance != null)
+                GameManager.Instance.GameOver();
+        }
     }
 }

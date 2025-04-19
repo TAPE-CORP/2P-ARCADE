@@ -1,6 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 
@@ -32,7 +30,6 @@ public class Player1Con : MonoBehaviour
     private Color _originalColor;
     private float _originalOuterRadius;
 
-    // 클릭 누적 시간
     private float clickHoldTime = 0f;
 
     void Start()
@@ -106,13 +103,13 @@ public class Player1Con : MonoBehaviour
         // 라이트 색상 변경
         flashlightLight.color = electricColor;
 
-        // Electric 태그 오브젝트 처리
+        // Electric 태그 오브젝트 처리 (Conveyor 방향 토글만)
         float radius = detectRadius > 0f
             ? detectRadius
             : flashlightLight.pointLightOuterRadius;
 
         Collider2D[] hits = Physics2D.OverlapCircleAll(flashlight.position, radius);
-        var toggledConveyors = new HashSet<Conveyor>();
+        var toggled = new System.Collections.Generic.HashSet<Conveyor>();
 
         foreach (var col in hits)
         {
@@ -120,45 +117,14 @@ public class Player1Con : MonoBehaviour
                 continue;
 
             Conveyor conveyor = col.GetComponent<Conveyor>();
-            if (conveyor != null && toggledConveyors.Add(conveyor))
+            if (conveyor != null && toggled.Add(conveyor))
             {
                 conveyor.SetDirection();
             }
         }
 
         // 대기 후 색상 복원
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(electricActiveTime);
         flashlightLight.color = _originalColor;
-    }
-
-    private IEnumerator ActivateUserComponents(GameObject obj, float duration)
-    {
-        var components = obj
-            .GetComponents<MonoBehaviour>()
-            .Where(c =>
-            {
-                if (c == null) return false;
-                var ns = c.GetType().Namespace;
-                return string.IsNullOrEmpty(ns) || !ns.StartsWith("UnityEngine");
-            })
-            .ToArray();
-
-        foreach (var comp in components)
-        {
-            if (comp.GetType().Name == nameof(Conveyor))
-            {
-                var conveyor = comp as Conveyor;
-                if (conveyor != null)
-                    conveyor.SetDirection();
-            }
-            comp.enabled = true;
-        }
-
-        yield return new WaitForSeconds(duration);
-
-        foreach (var comp in components)
-        {
-            comp.enabled = false;
-        }
     }
 }

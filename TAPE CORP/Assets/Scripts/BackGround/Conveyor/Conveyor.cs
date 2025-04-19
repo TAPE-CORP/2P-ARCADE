@@ -1,65 +1,53 @@
+// Conveyor.cs
 using UnityEngine;
 
+[RequireComponent(typeof(Collider2D))]
 public class Conveyor : MonoBehaviour
 {
-    public float speed = 1.5f; // 컨베이어 벨트의 속도
+    [Tooltip("컨베이어 벨트의 속도")]
+    public float speed = 1.5f;
+    [Tooltip("컨베이어 진행 방향 플래그 (회전 토글용)")]
     public bool isRight = true;
 
     private Vector2 moveDirection;
-    private Vector3 _originalScale;
+    private float _originalZRotation;
 
     void Awake()
     {
-        // 원본 스케일 저장
-        _originalScale = transform.localScale;
+        // 원본 Z 회전 저장
+        _originalZRotation = transform.localEulerAngles.z;
         ApplyFlip();
+
+        // 트리거로 설정
+        var col = GetComponent<Collider2D>();
+        col.isTrigger = true;
     }
 
     void Update()
     {
-        // 방향 설정 (스크롤 방향과 일치)
-        moveDirection = isRight ? Vector2.right : Vector2.left;
+        // 항상 transform.right 방향 그대로 사용
+        var dir3 = transform.right.normalized;
+        moveDirection = new Vector2(dir3.x, dir3.y);
     }
 
     private void OnTriggerStay2D(Collider2D collision)
     {
-        Rigidbody2D rb = collision.GetComponent<Rigidbody2D>();
-
-        if (rb != null && (rb.gameObject.CompareTag("Holder") || rb.gameObject.CompareTag("Box")))
-        {
-            rb.gravityScale = 0;
-            rb.velocity = moveDirection * speed;
-        }
-        else if (rb != null && collision.gameObject.layer != LayerMask.NameToLayer("Map"))
-        {
-            collision.transform.Translate(moveDirection * speed * Time.deltaTime);
-        }
-    }
-
-    private void OnTriggerExit2D(Collider2D collision)
-    {
-        Rigidbody2D rb = collision.GetComponent<Rigidbody2D>();
-
-        if (rb != null && (rb.gameObject.CompareTag("Holder") || rb.gameObject.CompareTag("Box")))
-        {
-            rb.gravityScale = 1;
-        }
+        // Translate 방식으로 밀어주기 (플레이어 이동과 자연스럽게 합산됨)
+        collision.transform.Translate(moveDirection * speed * Time.deltaTime, Space.World);
     }
 
     public void SetDirection()
     {
-        Debug.Log(" 방향 토글");
+        // 플래그 토글 → 180도 회전
         isRight = !isRight;
-        moveDirection = isRight ? Vector2.right : Vector2.left;
         ApplyFlip();
     }
 
-    // isRight 값에 따라 X축 스케일을 반전
     private void ApplyFlip()
     {
-        float flip = isRight ? 1f : -1f;
-        transform.localScale = new Vector3(_originalScale.x * flip,
-                                           _originalScale.y,
-                                           _originalScale.z);
+        float targetZ = isRight
+            ? _originalZRotation
+            : _originalZRotation + 180f;
+        transform.localEulerAngles = new Vector3(0, 0, targetZ);
     }
 }

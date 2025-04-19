@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.AI;
 
-[RequireComponent(typeof(Collider2D))]
 public class RandomNavMeshSpawner : MonoBehaviour
 {
     [Header("Prefab to Spawn")]
@@ -25,6 +24,7 @@ public class RandomNavMeshSpawner : MonoBehaviour
         // NavMesh 데이터 미리 가져두기
         _navTri = NavMesh.CalculateTriangulation();
         _triCount = _navTri.indices.Length / 3;
+        Debug.Log($"[NavMeshSpawner] Triangles: {_triCount}, Vertices: {_navTri.vertices.Length}");
         if (_triCount == 0)
             Debug.LogWarning("NavMesh가 비어 있습니다. 먼저 NavMesh를 베이크하세요.");
 
@@ -35,6 +35,7 @@ public class RandomNavMeshSpawner : MonoBehaviour
 
         // 반복 호출
         InvokeRepeating(nameof(SpawnOnNavMesh), 0f, spawnInterval);
+        Debug.Log($"[NavMeshSpawner] Will spawn every {spawnInterval} seconds.");
     }
 
     /// <summary>
@@ -42,6 +43,8 @@ public class RandomNavMeshSpawner : MonoBehaviour
     /// </summary>
     void SpawnOnNavMesh()
     {
+        Debug.Log($"[NavMeshSpawner] Spawn cycle started at {Time.time:F2}, spawnCount: {spawnCount}");
+
         if (_triCount == 0 || _cam == null)
             return;
 
@@ -50,23 +53,31 @@ public class RandomNavMeshSpawner : MonoBehaviour
             Vector3 spawnPos = Vector3.zero;
             bool found = false;
 
+            Debug.Log($"[NavMeshSpawner] Spawning instance {i + 1}/{spawnCount}");
+            int usedAttempt = 0;
+            int chosenTriangle = -1;
+
             // 최대 maxAttemptsPerSpawn회만 위치를 시도
             for (int attempt = 0; attempt < maxAttemptsPerSpawn; attempt++)
             {
-                // 랜덤 삼각형 선택
-                int t = Random.Range(0, _triCount) * 3;
+                usedAttempt = attempt + 1;
+                int triIndex = Random.Range(0, _triCount);
+                int t = triIndex * 3;
                 Vector3 a = _navTri.vertices[_navTri.indices[t]];
                 Vector3 b = _navTri.vertices[_navTri.indices[t + 1]];
                 Vector3 c = _navTri.vertices[_navTri.indices[t + 2]];
 
                 // 삼각형 내부 랜덤 지점 계산
                 spawnPos = RandomPointInTriangle(a, b, c);
-
-                // 뷰포트 좌표 확인
                 Vector3 vp = _cam.WorldToViewportPoint(spawnPos);
+
+                Debug.Log($"  Attempt {usedAttempt}/{maxAttemptsPerSpawn} on triangle {triIndex}: a={a}, b={b}, c={c}, candidate={spawnPos}, viewport={vp}");
+
                 if (vp.z > 0f && vp.x >= 0f && vp.x <= 1f && vp.y >= 0f && vp.y <= 1f)
                 {
                     found = true;
+                    chosenTriangle = triIndex;
+                    Debug.Log($"  Valid spawn found on attempt {usedAttempt} at triangle {chosenTriangle}, worldPos={spawnPos}");
                     break;
                 }
             }
@@ -74,10 +85,11 @@ public class RandomNavMeshSpawner : MonoBehaviour
             if (found)
             {
                 Instantiate(prefabToSpawn, spawnPos, Quaternion.identity);
+                Debug.Log($"[NavMeshSpawner] Prefab instantiated at {spawnPos} after {usedAttempt} attempts.");
             }
             else
             {
-                Debug.LogWarning($"뷰포트 내 유효 스폰 위치를 찾지 못했습니다 (시도: {maxAttemptsPerSpawn}회).");
+                Debug.LogWarning($"[NavMeshSpawner] 뷰포트 내 유효 스폰 위치를 찾지 못했습니다 (시도: {maxAttemptsPerSpawn}회). 마지막 시도 위치: {spawnPos}");
             }
         }
     }
