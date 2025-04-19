@@ -48,20 +48,14 @@ TagManager:
   - 
   - 
   m_SortingLayers:
-  - name: Default
-    uniqueID: 0
+  - name: Map
+    uniqueID: 2031672915
     locked: 0
   - name: BackGround
     uniqueID: 1343327319
     locked: 0
-  - name: Map
-    uniqueID: 2031672915
-    locked: 0
   - name: Convayor
     uniqueID: 528483233
-    locked: 0
-  - name: Player
-    uniqueID: 4215650863
     locked: 0
   - name: ChaseLight
     uniqueID: 1001239959
@@ -77,4 +71,10 @@ TagManager:
     locked: 0
   - name: LightDetectBlock
     uniqueID: 2464765771
+    locked: 0
+  - name: Player
+    uniqueID: 4215650863
+    locked: 0
+  - name: Default
+    uniqueID: 0
     locked: 0
