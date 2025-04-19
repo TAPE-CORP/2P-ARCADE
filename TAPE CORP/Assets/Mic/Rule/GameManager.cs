@@ -28,7 +28,6 @@ public class GameManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
             if (scorePanel != null) scorePanel.gameObject.SetActive(false);
             if (scoreText != null) scoreText.gameObject.SetActive(false);
             if (continueText != null) continueText.gameObject.SetActive(false);
@@ -38,7 +37,7 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        finalScore = Time.time * 7f;
+        finalScore += Time.deltaTime * 7f;
         if (!isGameOver && GameObject.FindGameObjectsWithTag("Player").Length == 0)
         {
             isGameOver = true;
@@ -142,6 +141,7 @@ public class GameManager : MonoBehaviour
         }
 
         Time.timeScale = 1f;
+        finalScore = 0;
         SceneManager.LoadScene("TitleScene", LoadSceneMode.Single);
     }
 }
