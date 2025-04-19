@@ -58,7 +58,10 @@ public class ResourceCon : MonoBehaviour
         Gage -= minusSpd * Time.deltaTime;
         Gage = Mathf.Max(Gage, 0f);
         Debug.Log($"남은 자원 = {Gage:f1}, minusSpd = {minusSpd:f2}");
-
+        if(Gage <= 0.1f)
+        {
+            GameManager.Instance.GameOver();
+        }
         // 2) 번개 플래시 페이드아웃 처리
         for (int i = _flashingLights.Count - 1; i >= 0; i--)
         {
