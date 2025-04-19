@@ -8,7 +8,6 @@ public class BasePlayerController : MonoBehaviour
     [Header("Movement Settings")]
     [Tooltip("이동 속도")]
     public float moveSpeed = 5f;
-
     [Header("Key Bindings (WASD)")]
     public KeyCode upKey = KeyCode.W;
     public KeyCode downKey = KeyCode.S;
